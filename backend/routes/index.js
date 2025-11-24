@@ -1,0 +1,15 @@
+const bannerrouter = require('./banner.router')
+const newsrouter = require('./news.router')
+const askedrouter = require('./frequensy.asked.router')
+const applicationrouter = require('./application.router')
+const userrouter = require('./user.router')
+const programrouter = require('./programs.router')
+const technologiesrouter = require('./technologies.router')
+const locationrouter = require('./location.router')
+const aboutrouter = require('./about.router')
+const opendatarouter = require('./opendata.router')
+const activityrouter = require('./activity.router')
+const announcementrouter = require('./announcement.router')
+const gallaryrouter = require('./gallary.router')
+
+module.exports = { bannerrouter, newsrouter, askedrouter, applicationrouter, userrouter, programrouter, technologiesrouter, locationrouter, aboutrouter, opendatarouter, activityrouter, announcementrouter, gallaryrouter }
