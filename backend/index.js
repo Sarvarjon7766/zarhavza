@@ -11,7 +11,7 @@ const connectMainDB = require('./config/db')
 connectMainDB()
 app.use(cors())
 app.use(express.json())
-const { bannerrouter, newsrouter, askedrouter, applicationrouter, userrouter, programrouter, technologiesrouter, locationrouter, aboutrouter, opendatarouter, activityrouter, announcementrouter, gallaryrouter } = require('./routes/index')
+const { bannerrouter, newsrouter, askedrouter, applicationrouter, userrouter, programrouter, technologiesrouter, locationrouter, aboutrouter, opendatarouter, activityrouter, announcementrouter, gallaryrouter, pagesrouter, generalaboutrouter, generalannouncementrouter, generalgalleryrouter, generalnewsrouter, socialnetworkrouter, contactrouter } = require('./routes/index')
 
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')))
 
@@ -28,6 +28,20 @@ app.use('/api/opendata', opendatarouter)
 app.use('/api/activity', activityrouter)
 app.use('/api/announcement', announcementrouter)
 app.use('/api/gallary', gallaryrouter)
+app.use('/api/generalnews', generalnewsrouter)
+
+
+
+app.use('/api/pages', pagesrouter)
+app.use('/api/generalabout', generalaboutrouter)
+app.use('/api/generalannouncement', generalannouncementrouter)
+app.use('/api/generalgallery', generalgalleryrouter)
+app.use('/api/generalnews', generalnewsrouter)
+
+app.use('/api/social-networks', socialnetworkrouter)
+app.use('/api/contact', contactrouter)
+
+
 
 
 app.use((err, req, res, next) => {

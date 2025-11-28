@@ -1,11 +1,11 @@
 import axios from 'axios'
-import { ArrowLeft, Calendar, Eye, X } from "lucide-react"
+import { Calendar, Eye, X } from "lucide-react"
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import Footer from '../component/Footer'
-import Navbar from '../component/Navbar'
+import Footer from './component/Footer'
+import Navbar from './component/Navbar'
 
-const AllNewsNavigate = () => {
+const NewsPage = ({ pageData }) => {
 	const navigate = useNavigate()
 	const [language, setLanguage] = useState(localStorage.getItem('lang') || 'uz')
 	const [news, setNews] = useState([])
@@ -49,7 +49,7 @@ const AllNewsNavigate = () => {
 	const fetchNews = async (lang = language) => {
 		try {
 			setLoading(true)
-			const res = await axios.get(`${BASE_URL}/api/news/getAll/${lang}`)
+			const res = await axios.get(`${BASE_URL}/api/generalnews/getAll/${lang}/${pageData.key}`)
 			if (res.data.success && res.data.news.length > 0) {
 				setNews(res.data.news)
 			} else {
@@ -111,17 +111,6 @@ const AllNewsNavigate = () => {
 	const handleCloseModal = () => {
 		setSelectedNews(null)
 		document.body.style.overflow = 'auto'
-	}
-
-	// Orqaga qaytish funksiyasi
-	const handleGoBack = () => {
-		if (selectedNews) {
-			// Agar modal ochiq bo'lsa, modalni yopish
-			handleCloseModal()
-		} else {
-			// Aks holda, oldingi sahifaga qaytish
-			navigate(-1)
-		}
 	}
 
 	// ESC tugmasi bilan modalni yopish
@@ -189,6 +178,48 @@ const AllNewsNavigate = () => {
 		}
 	}
 
+	// Breadcrumb navigation render qilish
+	const renderBreadcrumb = () => {
+		const homeText = breadcrumbText[language]?.home || breadcrumbText.uz.home
+
+		return (
+			<nav className="flex" aria-label="Breadcrumb">
+				<ol className="flex items-center space-x-2 text-sm text-gray-500">
+					{/* Bosh sahifa */}
+					<li>
+						<a href="/" className="hover:text-blue-600 transition-colors duration-200">
+							{homeText}
+						</a>
+					</li>
+
+					{/* ParentTitle bo'lsa */}
+					{pageData?.parentTitle && (
+						<>
+							<li className="flex items-center">
+								<svg className="w-4 h-4 mx-1" fill="currentColor" viewBox="0 0 20 20">
+									<path fillRule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clipRule="evenodd" />
+								</svg>
+								<span className="text-gray-500 hover:text-blue-600 transition-colors duration-200">
+									{pageData.parentTitle}
+								</span>
+							</li>
+						</>
+					)}
+
+					{/* Joriy sahifa title */}
+					<li className="flex items-center">
+						<svg className="w-4 h-4 mx-1" fill="currentColor" viewBox="0 0 20 20">
+							<path fillRule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clipRule="evenodd" />
+						</svg>
+						<span className="text-blue-600 font-medium">
+							{pageData?.title || breadcrumbText[language]?.news || breadcrumbText.uz.news}
+						</span>
+					</li>
+				</ol>
+			</nav>
+		)
+	}
+
 	const t = translations[language] || translations.uz
 
 	if (loading) {
@@ -198,31 +229,7 @@ const AllNewsNavigate = () => {
 				<main className="flex-grow container mx-auto px-4 py-10">
 					{/* Breadcrumb Navigation */}
 					<div className="mb-6">
-						<nav className="flex" aria-label="Breadcrumb">
-							<ol className="flex items-center space-x-2 text-sm text-gray-500">
-								<li>
-									<a href="/" className="hover:text-blue-600 transition-colors duration-200">
-										{breadcrumbText[language]?.home || breadcrumbText.uz.home}
-									</a>
-								</li>
-								<li className="flex items-center">
-									<svg className="w-4 h-4 mx-1" fill="currentColor" viewBox="0 0 20 20">
-										<path fillRule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clipRule="evenodd" />
-									</svg>
-									<a href="/allnews" className="hover:text-blue-600 transition-colors duration-200">
-										{breadcrumbText[language]?.informationService || breadcrumbText.uz.informationService}
-									</a>
-								</li>
-								<li className="flex items-center">
-									<svg className="w-4 h-4 mx-1" fill="currentColor" viewBox="0 0 20 20">
-										<path fillRule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clipRule="evenodd" />
-									</svg>
-									<span className="text-blue-600 font-medium">
-										{breadcrumbText[language]?.news || breadcrumbText.uz.news}
-									</span>
-								</li>
-							</ol>
-						</nav>
+						{renderBreadcrumb()}
 					</div>
 
 					<div className="text-center py-20">
@@ -245,54 +252,15 @@ const AllNewsNavigate = () => {
 				<main className="flex-grow container mx-auto px-4 sm:px-6 lg:px-8 py-10">
 					{/* Breadcrumb Navigation */}
 					<div className="mb-6">
-						<nav className="flex" aria-label="Breadcrumb">
-							<ol className="flex items-center space-x-2 text-sm text-gray-500">
-								<li>
-									<a href="/" className="hover:text-blue-600 transition-colors duration-200">
-										{breadcrumbText[language]?.home || breadcrumbText.uz.home}
-									</a>
-								</li>
-								<li className="flex items-center">
-									<svg className="w-4 h-4 mx-1" fill="currentColor" viewBox="0 0 20 20">
-										<path fillRule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clipRule="evenodd" />
-									</svg>
-									<a href="/allnews" className="hover:text-blue-600 transition-colors duration-200">
-										{breadcrumbText[language]?.informationService || breadcrumbText.uz.informationService}
-									</a>
-								</li>
-								<li className="flex items-center">
-									<svg className="w-4 h-4 mx-1" fill="currentColor" viewBox="0 0 20 20">
-										<path fillRule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clipRule="evenodd" />
-									</svg>
-									<span className="text-blue-600 font-medium">
-										{breadcrumbText[language]?.news || breadcrumbText.uz.news}
-									</span>
-								</li>
-							</ol>
-						</nav>
+						{renderBreadcrumb()}
 					</div>
 
-					{/* Sarlavha va orqaga qaytish tugmasi */}
-					<div className="flex items-center justify-between mb-12">
-						{/* Orqaga qaytish tugmasi */}
-						<button
-							onClick={handleGoBack}
-							className="flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-all duration-200 shadow-md hover:shadow-lg"
-						>
-							<ArrowLeft size={20} />
-							<span>{t.back}</span>
-						</button>
-
-						{/* Sarlavha */}
-						<div className="text-center flex-1">
-							<h1 className="text-3xl md:text-4xl font-bold text-blue-700 mb-4">
-								{t.title}
-							</h1>
-							<div className="w-24 h-1 bg-blue-600 mx-auto rounded-full"></div>
-						</div>
-
-						{/* Bo'sh joy - tugmalar teng joylashishi uchun */}
-						<div className="w-32"></div>
+					{/* Sarlavha */}
+					<div className="text-center mb-12">
+						<h1 className="text-3xl md:text-4xl font-bold text-blue-700 mb-4">
+							{pageData?.title || t.title}
+						</h1>
+						<div className="w-24 h-1 bg-blue-600 mx-auto rounded-full"></div>
 					</div>
 
 					{/* 🔹 Yangiliklar mavjud emas */}
@@ -321,7 +289,7 @@ const AllNewsNavigate = () => {
 										/>
 										<div className="absolute top-4 left-4">
 											<span className="bg-blue-600 text-white px-3 py-1 rounded-full text-sm font-medium">
-												{t.newsLabel}
+												{pageData.title}
 											</span>
 										</div>
 										{/* Rasmlar soni */}
@@ -373,18 +341,8 @@ const AllNewsNavigate = () => {
 			{selectedNews && (
 				<div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4">
 					<div className="relative w-full max-w-6xl max-h-[95vh] bg-white rounded-2xl shadow-2xl overflow-hidden flex flex-col">
-						{/* Yopish va orqaga qaytish tugmalari */}
+						{/* Yopish tugmasi */}
 						<div className="absolute top-4 right-4 z-10 flex gap-2">
-							{/* Orqaga qaytish tugmasi */}
-							<button
-								onClick={handleGoBack}
-								className="bg-white/90 hover:bg-white text-gray-700 rounded-full p-2 transition-all duration-200 shadow-lg flex items-center justify-center"
-								title={t.back}
-							>
-								<ArrowLeft size={20} />
-							</button>
-
-							{/* Yopish tugmasi */}
 							<button
 								onClick={handleCloseModal}
 								className="bg-white/90 hover:bg-white text-gray-700 rounded-full p-2 transition-all duration-200 shadow-lg"
@@ -448,4 +406,4 @@ const AllNewsNavigate = () => {
 	)
 }
 
-export default AllNewsNavigate
+export default NewsPage

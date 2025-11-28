@@ -21,6 +21,22 @@ const OpeningDataNavigatsiya = () => {
 		en: "Open Data"
 	}
 
+	// Breadcrumb navigation text
+	const breadcrumbText = {
+		uz: {
+			home: "Bosh sahifa",
+			openData: "Ochiq Ma'lumotlar"
+		},
+		ru: {
+			home: "Главная",
+			openData: "Открытые Данные"
+		},
+		en: {
+			home: "Home",
+			openData: "Open Data"
+		}
+	}
+
 	// Fetch data from API using axios
 	useEffect(() => {
 		const fetchOpenData = async () => {
@@ -81,11 +97,35 @@ const OpeningDataNavigatsiya = () => {
 
 				{/* 🔹 Kontent */}
 				<main className="flex-1 px-5 md:px-16 py-10">
-					<div className="max-w-6xl mx-auto text-center space-y-8">
+					<div className="max-w-6xl mx-auto space-y-8">
+						{/* Breadcrumb Navigation */}
+						<div className="mb-6">
+							<nav className="flex" aria-label="Breadcrumb">
+								<ol className="flex items-center space-x-2 text-sm text-gray-500">
+									<li>
+										<a href="/" className="hover:text-blue-600 transition-colors duration-200">
+											{breadcrumbText[currentLang]?.home || breadcrumbText.uz.home}
+										</a>
+									</li>
+									<li className="flex items-center">
+										<svg className="w-4 h-4 mx-1" fill="currentColor" viewBox="0 0 20 20">
+											<path fillRule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clipRule="evenodd" />
+										</svg>
+										<span className="text-blue-600 font-medium">
+											{breadcrumbText[currentLang]?.openData || breadcrumbText.uz.openData}
+										</span>
+									</li>
+								</ol>
+							</nav>
+						</div>
+
 						{/* Sarlavha */}
-						<h1 className="text-3xl md:text-4xl font-bold text-gray-800">
-							{sarlavha[currentLang] || sarlavha.uz}
-						</h1>
+						<div className="text-center">
+							<h1 className="text-3xl md:text-4xl font-bold text-gray-800 mb-4">
+								{sarlavha[currentLang] || sarlavha.uz}
+							</h1>
+							<div className="w-24 h-1 bg-blue-500 mx-auto rounded-full"></div>
+						</div>
 
 						{/* Loading skeleton */}
 						<div className="animate-pulse space-y-6">
@@ -120,11 +160,35 @@ const OpeningDataNavigatsiya = () => {
 
 				{/* 🔹 Kontent */}
 				<main className="flex-1 px-5 md:px-16 py-10">
-					<div className="max-w-6xl mx-auto text-center space-y-8">
+					<div className="max-w-6xl mx-auto space-y-8">
+						{/* Breadcrumb Navigation */}
+						<div className="mb-6">
+							<nav className="flex" aria-label="Breadcrumb">
+								<ol className="flex items-center space-x-2 text-sm text-gray-500">
+									<li>
+										<a href="/" className="hover:text-blue-600 transition-colors duration-200">
+											{breadcrumbText[currentLang]?.home || breadcrumbText.uz.home}
+										</a>
+									</li>
+									<li className="flex items-center">
+										<svg className="w-4 h-4 mx-1" fill="currentColor" viewBox="0 0 20 20">
+											<path fillRule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clipRule="evenodd" />
+										</svg>
+										<span className="text-blue-600 font-medium">
+											{breadcrumbText[currentLang]?.openData || breadcrumbText.uz.openData}
+										</span>
+									</li>
+								</ol>
+							</nav>
+						</div>
+
 						{/* Sarlavha */}
-						<h1 className="text-3xl md:text-4xl font-bold text-gray-800">
-							{sarlavha[currentLang] || sarlavha.uz}
-						</h1>
+						<div className="text-center">
+							<h1 className="text-3xl md:text-4xl font-bold text-gray-800 mb-4">
+								{sarlavha[currentLang] || sarlavha.uz}
+							</h1>
+							<div className="w-24 h-1 bg-blue-500 mx-auto rounded-full"></div>
+						</div>
 
 					</div>
 				</main>
@@ -145,6 +209,27 @@ const OpeningDataNavigatsiya = () => {
 			{/* 🔹 Kontent */}
 			<main className="flex-1 px-5 md:px-16 py-10">
 				<div className="max-w-6xl mx-auto space-y-8">
+					{/* Breadcrumb Navigation */}
+					<div className="mb-6">
+						<nav className="flex" aria-label="Breadcrumb">
+							<ol className="flex items-center space-x-2 text-sm text-gray-500">
+								<li>
+									<a href="/" className="hover:text-blue-600 transition-colors duration-200">
+										{breadcrumbText[currentLang]?.home || breadcrumbText.uz.home}
+									</a>
+								</li>
+								<li className="flex items-center">
+									<svg className="w-4 h-4 mx-1" fill="currentColor" viewBox="0 0 20 20">
+										<path fillRule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clipRule="evenodd" />
+									</svg>
+									<span className="text-blue-600 font-medium">
+										{breadcrumbText[currentLang]?.openData || breadcrumbText.uz.openData}
+									</span>
+								</li>
+							</ol>
+						</nav>
+					</div>
+
 					{/* Sarlavha */}
 					<div className="text-center">
 						<h1 className="text-3xl md:text-4xl font-bold text-gray-800 mb-4">

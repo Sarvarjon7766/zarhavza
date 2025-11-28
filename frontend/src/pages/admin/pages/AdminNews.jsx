@@ -20,8 +20,11 @@ const AdminNews = () => {
 		photos: []
 	})
 	const [selectedPhotos, setSelectedPhotos] = useState([])
+	const [selectedVideos, setSelectedVideos] = useState([])
 	const [photoPreviews, setPhotoPreviews] = useState([])
+	const [videoPreviews, setVideoPreviews] = useState([])
 	const [removedPhotos, setRemovedPhotos] = useState([])
+	const [removedVideos, setRemovedVideos] = useState([])
 
 	// 🌐 Barcha yangiliklarni olish
 	useEffect(() => {
@@ -78,11 +81,24 @@ const AdminNews = () => {
 	// 🖼️ Rasmlarni yuklash
 	const handlePhotoChange = (e) => {
 		const files = Array.from(e.target.files)
-		const newSelectedPhotos = [...selectedPhotos, ...files]
+		const imageFiles = files.filter(file => file.type.startsWith('image/'))
+		const newSelectedPhotos = [...selectedPhotos, ...imageFiles]
 		setSelectedPhotos(newSelectedPhotos)
 
-		const newPreviews = files.map(file => URL.createObjectURL(file))
+		const newPreviews = imageFiles.map(file => URL.createObjectURL(file))
 		setPhotoPreviews(prev => [...prev, ...newPreviews])
+		e.target.value = ''
+	}
+
+	// 🎥 Videolarni yuklash
+	const handleVideoChange = (e) => {
+		const files = Array.from(e.target.files)
+		const videoFiles = files.filter(file => file.type.startsWith('video/'))
+		const newSelectedVideos = [...selectedVideos, ...videoFiles]
+		setSelectedVideos(newSelectedVideos)
+
+		const newPreviews = videoFiles.map(file => URL.createObjectURL(file))
+		setVideoPreviews(prev => [...prev, ...newPreviews])
 		e.target.value = ''
 	}
 
@@ -99,8 +115,11 @@ const AdminNews = () => {
 			photos: []
 		})
 		setSelectedPhotos([])
+		setSelectedVideos([])
 		setPhotoPreviews([])
+		setVideoPreviews([])
 		setRemovedPhotos([])
+		setRemovedVideos([])
 		setShowForm(true)
 	}
 
@@ -116,9 +135,25 @@ const AdminNews = () => {
 			description_en: newsItem.description_en,
 			photos: newsItem.photos
 		})
-		setPhotoPreviews(newsItem.photos.map(photo => `${BASE_URL}${photo}`))
+
+		// Mavjud media fayllarni ajratish
+		const existingPhotos = []
+		const existingVideos = []
+
+		newsItem.photos.forEach(media => {
+			if (media.match(/\.(mp4|avi|mov|wmv|flv|webm)$/i)) {
+				existingVideos.push(`${BASE_URL}${media}`)
+			} else {
+				existingPhotos.push(`${BASE_URL}${media}`)
+			}
+		})
+
+		setPhotoPreviews(existingPhotos)
+		setVideoPreviews(existingVideos)
 		setSelectedPhotos([])
+		setSelectedVideos([])
 		setRemovedPhotos([])
+		setRemovedVideos([])
 		setShowForm(true)
 	}
 
@@ -144,10 +179,18 @@ const AdminNews = () => {
 				submitData.append('photos', photo)
 			})
 
-			// O'chirilgan rasmlarni yuborish
+			// Yangi videolarni qo'shish
+			selectedVideos.forEach(video => {
+				submitData.append('photos', video)
+			})
+
+			// O'chirilgan media fayllarni yuborish
 			if (editingNews) {
 				removedPhotos.forEach(photoPath => {
 					submitData.append('removedPhotos', photoPath)
+				})
+				removedVideos.forEach(videoPath => {
+					submitData.append('removedPhotos', videoPath)
 				})
 			}
 
@@ -222,8 +265,11 @@ const AdminNews = () => {
 			photos: []
 		})
 		setSelectedPhotos([])
+		setSelectedVideos([])
 		setPhotoPreviews([])
+		setVideoPreviews([])
 		setRemovedPhotos([])
+		setRemovedVideos([])
 		setEditingNews(null)
 	}
 
@@ -249,6 +295,22 @@ const AdminNews = () => {
 		setSelectedPhotos(newPhotos)
 	}
 
+	// 🗑️ Videoni o'chirish
+	const removeVideoPreview = (index) => {
+		const newPreviews = [...videoPreviews]
+		const removedPreview = newPreviews.splice(index, 1)[0]
+
+		if (removedPreview.startsWith('blob:')) {
+			URL.revokeObjectURL(removedPreview)
+		}
+
+		setVideoPreviews(newPreviews)
+
+		const newVideos = [...selectedVideos]
+		newVideos.splice(index, 1)
+		setSelectedVideos(newVideos)
+	}
+
 	// 🗑️ Mavjud rasmni o'chirish
 	const removeExistingPhoto = (newsId, photoPath, index) => {
 		if (!window.confirm("Bu rasmni o'chirmoqchimisiz?")) return
@@ -259,6 +321,26 @@ const AdminNews = () => {
 			setPhotoPreviews(updatedPreviews)
 			setRemovedPhotos(prev => [...prev, photoPath])
 		}
+	}
+
+	// 🗑️ Mavjud videoni o'chirish
+	const removeExistingVideo = (newsId, videoPath, index) => {
+		if (!window.confirm("Bu videoni o'chirmoqchimisiz?")) return
+
+		if (editingNews && editingNews._id === newsId) {
+			const updatedPreviews = [...videoPreviews]
+			updatedPreviews.splice(index, 1)
+			setVideoPreviews(updatedPreviews)
+			setRemovedVideos(prev => [...prev, videoPath])
+		}
+	}
+
+	// Fayl turini aniqlash
+	const getFileType = (url) => {
+		if (url.match(/\.(mp4|avi|mov|wmv|flv|webm)$/i)) {
+			return 'video'
+		}
+		return 'image'
 	}
 
 	return (
@@ -411,59 +493,118 @@ const AdminNews = () => {
 									</div>
 								</div>
 
-								{/* Photos */}
-								<div className="space-y-4">
-									<label className="block text-sm font-medium text-gray-700">Rasmlar ({photoPreviews.length} ta)</label>
+								{/* Media Files */}
+								<div className="space-y-6">
+									{/* Photos */}
+									<div className="space-y-4">
+										<label className="block text-sm font-medium text-gray-700">Rasmlar ({photoPreviews.length} ta)</label>
 
-									{photoPreviews.length > 0 && (
-										<div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-											{photoPreviews.map((preview, index) => (
-												<div key={index} className="relative">
-													<img
-														src={preview}
-														alt={`Preview ${index + 1}`}
-														className="w-full h-24 object-cover rounded-lg border"
-													/>
-													<button
-														type="button"
-														onClick={() => {
-															if (preview.startsWith(BASE_URL)) {
-																const photoIndex = formData.photos.findIndex(photo =>
-																	`${BASE_URL}${photo}` === preview
-																)
-																if (photoIndex !== -1) {
-																	removeExistingPhoto(editingNews._id, formData.photos[photoIndex], index)
+										{photoPreviews.length > 0 && (
+											<div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+												{photoPreviews.map((preview, index) => (
+													<div key={index} className="relative">
+														<img
+															src={preview}
+															alt={`Preview ${index + 1}`}
+															className="w-full h-24 object-cover rounded-lg border"
+														/>
+														<button
+															type="button"
+															onClick={() => {
+																if (preview.startsWith(BASE_URL)) {
+																	const photoIndex = formData.photos.findIndex(photo =>
+																		`${BASE_URL}${photo}` === preview
+																	)
+																	if (photoIndex !== -1) {
+																		removeExistingPhoto(editingNews._id, formData.photos[photoIndex], index)
+																	}
+																} else {
+																	removePhotoPreview(index)
 																}
-															} else {
-																removePhotoPreview(index)
-															}
-														}}
-														className="absolute -top-2 -right-2 bg-red-500 hover:bg-red-600 text-white p-1 rounded-full"
-													>
-														<svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-															<path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-														</svg>
-													</button>
-												</div>
-											))}
-										</div>
-									)}
+															}}
+															className="absolute -top-2 -right-2 bg-red-500 hover:bg-red-600 text-white p-1 rounded-full"
+														>
+															<svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+																<path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+															</svg>
+														</button>
+													</div>
+												))}
+											</div>
+										)}
 
-									<div className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center">
-										<input
-											type="file"
-											accept="image/*"
-											onChange={handlePhotoChange}
-											className="hidden"
-											id="photo-upload"
-											multiple
-										/>
-										<label htmlFor="photo-upload" className="cursor-pointer">
-											<svg className="w-8 h-8 text-gray-400 mx-auto mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-												<path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
-											</svg>
-											<p className="text-gray-600">Rasmlarni tanlang</p>
-										</label>
+										<div className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center">
+											<input
+												type="file"
+												accept="image/*"
+												onChange={handlePhotoChange}
+												className="hidden"
+												id="photo-upload"
+												multiple
+											/>
+											<label htmlFor="photo-upload" className="cursor-pointer">
+												<svg className="w-8 h-8 text-gray-400 mx-auto mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+													<path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+												</svg>
+												<p className="text-gray-600">Rasmlarni tanlang</p>
+											</label>
+										</div>
+									</div>
+
+									{/* Videos */}
+									<div className="space-y-4">
+										<label className="block text-sm font-medium text-gray-700">Videolar ({videoPreviews.length} ta)</label>
+
+										{videoPreviews.length > 0 && (
+											<div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+												{videoPreviews.map((preview, index) => (
+													<div key={index} className="relative">
+														<video
+															src={preview}
+															className="w-full h-32 object-cover rounded-lg border"
+															controls
+														/>
+														<button
+															type="button"
+															onClick={() => {
+																if (preview.startsWith(BASE_URL)) {
+																	const videoIndex = formData.photos.findIndex(video =>
+																		`${BASE_URL}${video}` === preview
+																	)
+																	if (videoIndex !== -1) {
+																		removeExistingVideo(editingNews._id, formData.photos[videoIndex], index)
+																	}
+																} else {
+																	removeVideoPreview(index)
+																}
+															}}
+															className="absolute -top-2 -right-2 bg-red-500 hover:bg-red-600 text-white p-1 rounded-full"
+														>
+															<svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+																<path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+															</svg>
+														</button>
+													</div>
+												))}
+											</div>
+										)}
+
+										<div className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center">
+											<input
+												type="file"
+												accept="video/*"
+												onChange={handleVideoChange}
+												className="hidden"
+												id="video-upload"
+												multiple
+											/>
+											<label htmlFor="video-upload" className="cursor-pointer">
+												<svg className="w-8 h-8 text-gray-400 mx-auto mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+													<path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
+												</svg>
+												<p className="text-gray-600">Videolarni tanlang</p>
+											</label>
+										</div>
 									</div>
 								</div>
 
@@ -531,42 +672,52 @@ const AdminNews = () => {
 							</div>
 						) : (
 							<div className="space-y-4">
-								{filteredNews.map((newsItem) => (
-									<div key={newsItem._id} className="border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow">
-										<div className="flex justify-between items-start">
-											<div className="flex-1">
-												<h3 className="font-semibold text-gray-800 mb-1">{newsItem.title_uz}</h3>
-												<p className="text-gray-600 text-sm mb-2 line-clamp-2">
-													{newsItem.description_uz}
-												</p>
-												<div className="flex items-center space-x-4 text-xs text-gray-500">
-													<span>{new Date(newsItem.createdAt).toLocaleDateString()}</span>
-													<span>{newsItem.photos.length} ta rasm</span>
+								{filteredNews.map((newsItem) => {
+									const photosCount = newsItem.photos.filter(media =>
+										!media.match(/\.(mp4|avi|mov|wmv|flv|webm)$/i)
+									).length
+									const videosCount = newsItem.photos.filter(media =>
+										media.match(/\.(mp4|avi|mov|wmv|flv|webm)$/i)
+									).length
+
+									return (
+										<div key={newsItem._id} className="border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow">
+											<div className="flex justify-between items-start">
+												<div className="flex-1">
+													<h3 className="font-semibold text-gray-800 mb-1">{newsItem.title_uz}</h3>
+													<p className="text-gray-600 text-sm mb-2 line-clamp-2">
+														{newsItem.description_uz}
+													</p>
+													<div className="flex items-center space-x-4 text-xs text-gray-500">
+														<span>{new Date(newsItem.createdAt).toLocaleDateString()}</span>
+														{photosCount > 0 && <span>{photosCount} ta rasm</span>}
+														{videosCount > 0 && <span>{videosCount} ta video</span>}
+													</div>
+												</div>
+												<div className="flex space-x-2 ml-4">
+													<button
+														onClick={() => handleEdit(newsItem)}
+														className="bg-blue-500 hover:bg-blue-600 text-white p-2 rounded-lg"
+														title="Tahrirlash"
+													>
+														<svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+															<path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+														</svg>
+													</button>
+													<button
+														onClick={() => handleDelete(newsItem._id)}
+														className="bg-red-500 hover:bg-red-600 text-white p-2 rounded-lg"
+														title="O'chirish"
+													>
+														<svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+															<path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+														</svg>
+													</button>
 												</div>
 											</div>
-											<div className="flex space-x-2 ml-4">
-												<button
-													onClick={() => handleEdit(newsItem)}
-													className="bg-blue-500 hover:bg-blue-600 text-white p-2 rounded-lg"
-													title="Tahrirlash"
-												>
-													<svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-														<path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-													</svg>
-												</button>
-												<button
-													onClick={() => handleDelete(newsItem._id)}
-													className="bg-red-500 hover:bg-red-600 text-white p-2 rounded-lg"
-													title="O'chirish"
-												>
-													<svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-														<path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-													</svg>
-												</button>
-											</div>
 										</div>
-									</div>
-								))}
+									)
+								})}
 							</div>
 						)}
 					</div>

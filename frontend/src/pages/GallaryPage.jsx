@@ -1,11 +1,11 @@
 import axios from 'axios'
 import { useEffect, useState } from 'react'
-import Footer from '../component/Footer'
-import Navbar from '../component/Navbar'
+import Footer from './component/Footer'
+import Navbar from './component/Navbar'
 
 const BASE_URL = import.meta.env.VITE_BASE_URL
 
-const VideoGallaryNavigate = () => {
+const GallaryPage = ({ pageData }) => {
 	// State for current language
 	const [currentLang, setCurrentLang] = useState(localStorage.getItem('lang') || 'uz')
 	const [galleries, setGalleries] = useState([])
@@ -71,7 +71,7 @@ const VideoGallaryNavigate = () => {
 	const fetchGalleries = async () => {
 		try {
 			setLoading(true)
-			const response = await axios.get(`${BASE_URL}/api/gallary/getAll/${currentLang}`)
+			const response = await axios.get(`${BASE_URL}/api/generalgallery/getAll/${currentLang}/${pageData.key}`)
 
 			if (response.data.success && response.data.gallarys) {
 				setGalleries(response.data.gallarys)
@@ -256,6 +256,48 @@ const VideoGallaryNavigate = () => {
 		)
 	}
 
+	// Breadcrumb navigation render qilish
+	const renderBreadcrumb = () => {
+		const homeText = breadcrumbText[currentLang]?.home || breadcrumbText.uz.home
+
+		return (
+			<nav className="flex" aria-label="Breadcrumb">
+				<ol className="flex items-center space-x-2 text-sm text-gray-500">
+					{/* Bosh sahifa */}
+					<li>
+						<a href="/" className="hover:text-blue-600 transition-colors duration-200">
+							{homeText}
+						</a>
+					</li>
+
+					{/* ParentTitle bo'lsa */}
+					{pageData?.parentTitle && (
+						<>
+							<li className="flex items-center">
+								<svg className="w-4 h-4 mx-1" fill="currentColor" viewBox="0 0 20 20">
+									<path fillRule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clipRule="evenodd" />
+								</svg>
+								<span className="text-gray-500 hover:text-blue-600 transition-colors duration-200">
+									{pageData.parentTitle}
+								</span>
+							</li>
+						</>
+					)}
+
+					{/* Joriy sahifa title */}
+					<li className="flex items-center">
+						<svg className="w-4 h-4 mx-1" fill="currentColor" viewBox="0 0 20 20">
+							<path fillRule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clipRule="evenodd" />
+						</svg>
+						<span className="text-blue-600 font-medium">
+							{pageData?.title || breadcrumbText[currentLang]?.gallery || breadcrumbText.uz.gallery}
+						</span>
+					</li>
+				</ol>
+			</nav>
+		)
+	}
+
 	// Loading state
 	if (loading) {
 		return (
@@ -265,31 +307,7 @@ const VideoGallaryNavigate = () => {
 					<div className="max-w-7xl mx-auto">
 						{/* Breadcrumb Navigation */}
 						<div className="mb-6">
-							<nav className="flex" aria-label="Breadcrumb">
-								<ol className="flex items-center space-x-2 text-sm text-gray-500">
-									<li>
-										<a href="/" className="hover:text-blue-600 transition-colors duration-200">
-											{breadcrumbText[currentLang]?.home || breadcrumbText.uz.home}
-										</a>
-									</li>
-									<li className="flex items-center">
-										<svg className="w-4 h-4 mx-1" fill="currentColor" viewBox="0 0 20 20">
-											<path fillRule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clipRule="evenodd" />
-										</svg>
-										<a href="/video-gallery" className="hover:text-blue-600 transition-colors duration-200">
-											{breadcrumbText[currentLang]?.informationService || breadcrumbText.uz.informationService}
-										</a>
-									</li>
-									<li className="flex items-center">
-										<svg className="w-4 h-4 mx-1" fill="currentColor" viewBox="0 0 20 20">
-											<path fillRule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clipRule="evenodd" />
-										</svg>
-										<span className="text-blue-600 font-medium">
-											{breadcrumbText[currentLang]?.gallery || breadcrumbText.uz.gallery}
-										</span>
-									</li>
-								</ol>
-							</nav>
+							{renderBreadcrumb()}
 						</div>
 
 						{/* Sarlavha Section */}
@@ -451,37 +469,13 @@ const VideoGallaryNavigate = () => {
 				<div className="max-w-7xl mx-auto">
 					{/* Breadcrumb Navigation */}
 					<div className="mb-6">
-						<nav className="flex" aria-label="Breadcrumb">
-							<ol className="flex items-center space-x-2 text-sm text-gray-500">
-								<li>
-									<a href="/" className="hover:text-blue-600 transition-colors duration-200">
-										{breadcrumbText[currentLang]?.home || breadcrumbText.uz.home}
-									</a>
-								</li>
-								<li className="flex items-center">
-									<svg className="w-4 h-4 mx-1" fill="currentColor" viewBox="0 0 20 20">
-										<path fillRule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clipRule="evenodd" />
-									</svg>
-									<a href="/video-gallery" className="hover:text-blue-600 transition-colors duration-200">
-										{breadcrumbText[currentLang]?.informationService || breadcrumbText.uz.informationService}
-									</a>
-								</li>
-								<li className="flex items-center">
-									<svg className="w-4 h-4 mx-1" fill="currentColor" viewBox="0 0 20 20">
-										<path fillRule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clipRule="evenodd" />
-									</svg>
-									<span className="text-blue-600 font-medium">
-										{breadcrumbText[currentLang]?.gallery || breadcrumbText.uz.gallery}
-									</span>
-								</li>
-							</ol>
-						</nav>
+						{renderBreadcrumb()}
 					</div>
 
 					{/* Sarlavha Section */}
 					<div className="text-center mb-16">
 						<h1 className="text-4xl md:text-5xl font-bold text-gray-800 mb-6">
-							{t.title}
+							{pageData?.title || t.title}
 						</h1>
 						<div className="w-32 h-1 bg-gray-800 mx-auto rounded-full shadow-lg"></div>
 					</div>
@@ -538,7 +532,7 @@ const VideoGallaryNavigate = () => {
 												onClick={() => openGalleryModal(gallery, 0)}
 												className="text-blue-600 hover:text-blue-700 font-medium text-sm flex items-center gap-1"
 											>
-												{t.viewGallery}
+												{pageData.title}
 												<svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
 													<path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
 												</svg>
@@ -570,4 +564,4 @@ const VideoGallaryNavigate = () => {
 	)
 }
 
-export default VideoGallaryNavigate
+export default GallaryPage

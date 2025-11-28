@@ -45,6 +45,22 @@ const ActiviteNavigate = () => {
 		}
 	}
 
+	// Breadcrumb navigation text
+	const breadcrumbText = {
+		uz: {
+			home: "Bosh sahifa",
+			activity: "Faoliyat"
+		},
+		ru: {
+			home: "Главная",
+			activity: "Деятельность"
+		},
+		en: {
+			home: "Home",
+			activity: "Activities"
+		}
+	}
+
 	// Fetch data from API using axios
 	useEffect(() => {
 		const fetchActivityData = async () => {
@@ -103,6 +119,27 @@ const ActiviteNavigate = () => {
 				<Navbar />
 				<main className="flex-grow bg-gradient-to-br from-blue-50 to-indigo-100 py-12 px-4 sm:px-6 lg:px-8">
 					<div className="max-w-7xl mx-auto">
+						{/* Breadcrumb Navigation */}
+						<div className="mb-6">
+							<nav className="flex" aria-label="Breadcrumb">
+								<ol className="flex items-center space-x-2 text-sm text-gray-500">
+									<li>
+										<a href="/" className="hover:text-blue-600 transition-colors duration-200">
+											{breadcrumbText[currentLang]?.home || breadcrumbText.uz.home}
+										</a>
+									</li>
+									<li className="flex items-center">
+										<svg className="w-4 h-4 mx-1" fill="currentColor" viewBox="0 0 20 20">
+											<path fillRule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clipRule="evenodd" />
+										</svg>
+										<span className="text-blue-600 font-medium">
+											{breadcrumbText[currentLang]?.activity || breadcrumbText.uz.activity}
+										</span>
+									</li>
+								</ol>
+							</nav>
+						</div>
+
 						{/* Sarlavha Section */}
 						<div className="text-center mb-16">
 							<h1 className="text-4xl md:text-5xl font-bold text-gray-800 mb-6">
@@ -140,6 +177,27 @@ const ActiviteNavigate = () => {
 				<Navbar />
 				<main className="flex-grow bg-gradient-to-br from-blue-50 to-indigo-100 py-12 px-4 sm:px-6 lg:px-8">
 					<div className="max-w-7xl mx-auto">
+						{/* Breadcrumb Navigation */}
+						<div className="mb-6">
+							<nav className="flex" aria-label="Breadcrumb">
+								<ol className="flex items-center space-x-2 text-sm text-gray-500">
+									<li>
+										<a href="/" className="hover:text-blue-600 transition-colors duration-200">
+											{breadcrumbText[currentLang]?.home || breadcrumbText.uz.home}
+										</a>
+									</li>
+									<li className="flex items-center">
+										<svg className="w-4 h-4 mx-1" fill="currentColor" viewBox="0 0 20 20">
+											<path fillRule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clipRule="evenodd" />
+										</svg>
+										<span className="text-blue-600 font-medium">
+											{breadcrumbText[currentLang]?.activity || breadcrumbText.uz.activity}
+										</span>
+									</li>
+								</ol>
+							</nav>
+						</div>
+
 						{/* Sarlavha Section */}
 						<div className="text-center mb-16">
 							<h1 className="text-4xl md:text-5xl font-bold text-gray-800 mb-6">
@@ -163,6 +221,27 @@ const ActiviteNavigate = () => {
 			{/* Main Content */}
 			<main className="flex-grow bg-gradient-to-br from-blue-50 to-indigo-100 py-12 px-4 sm:px-6 lg:px-8">
 				<div className="max-w-7xl mx-auto">
+					{/* Breadcrumb Navigation */}
+					<div className="mb-6">
+						<nav className="flex" aria-label="Breadcrumb">
+							<ol className="flex items-center space-x-2 text-sm text-gray-500">
+								<li>
+									<a href="/" className="hover:text-blue-600 transition-colors duration-200">
+										{breadcrumbText[currentLang]?.home || breadcrumbText.uz.home}
+									</a>
+								</li>
+								<li className="flex items-center">
+									<svg className="w-4 h-4 mx-1" fill="currentColor" viewBox="0 0 20 20">
+										<path fillRule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clipRule="evenodd" />
+									</svg>
+									<span className="text-blue-600 font-medium">
+										{breadcrumbText[currentLang]?.activity || breadcrumbText.uz.activity}
+									</span>
+								</li>
+							</ol>
+						</nav>
+					</div>
+
 					{/* Sarlavha Section */}
 					<div className="text-center mb-16">
 						<h1 className="text-4xl md:text-5xl font-bold text-gray-800 mb-6">

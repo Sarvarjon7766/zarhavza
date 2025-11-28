@@ -1,11 +1,11 @@
 import axios from "axios"
 import { useEffect, useState } from "react"
-import Footer from '../component/Footer'
-import Navbar from '../component/Navbar'
+import Footer from './component/Footer'
+import Navbar from './component/Navbar'
 
 const BASE_URL = import.meta.env.VITE_BASE_URL
 
-const AboutUsNavigatsiya = () => {
+const StaticPage = ({ pageData }) => {
 	// State for current language
 	const [currentLang, setCurrentLang] = useState(localStorage.getItem('lang') || 'uz')
 
@@ -20,7 +20,6 @@ const AboutUsNavigatsiya = () => {
 		ru: "О нас",
 		en: "About Us"
 	}
-
 	// Breadcrumb navigation text
 	const breadcrumbText = {
 		uz: {
@@ -44,7 +43,8 @@ const AboutUsNavigatsiya = () => {
 				setLoading(true)
 				setError(null)
 
-				const response = await axios.get(`${BASE_URL}/api/about/getAll/${currentLang}`)
+				const response = await axios.get(`${BASE_URL}/api/generalabout/getAll/${currentLang}/${pageData.key}`)
+				console.log(response)
 
 				if (response.data.success && response.data.abouts) {
 					setAboutData(response.data.abouts)
@@ -60,7 +60,7 @@ const AboutUsNavigatsiya = () => {
 		}
 
 		fetchAboutData()
-	}, [currentLang])
+	}, [currentLang, pageData.key])
 
 	// Listen for language changes
 	useEffect(() => {
@@ -86,6 +86,48 @@ const AboutUsNavigatsiya = () => {
 		}
 	}, [])
 
+	// Breadcrumb navigation render qilish
+	const renderBreadcrumb = () => {
+		const homeText = breadcrumbText[currentLang]?.home || breadcrumbText.uz.home
+
+		return (
+			<nav className="flex" aria-label="Breadcrumb">
+				<ol className="flex items-center space-x-2 text-sm text-gray-500">
+					{/* Bosh sahifa */}
+					<li>
+						<a href="/" className="hover:text-blue-600 transition-colors duration-200">
+							{homeText}
+						</a>
+					</li>
+
+					{/* ParentTitle bo'lsa */}
+					{pageData?.parentTitle && (
+						<>
+							<li className="flex items-center">
+								<svg className="w-4 h-4 mx-1" fill="currentColor" viewBox="0 0 20 20">
+									<path fillRule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clipRule="evenodd" />
+								</svg>
+								<span className="text-gray-500 hover:text-blue-600 transition-colors duration-200">
+									{pageData.parentTitle}
+								</span>
+							</li>
+						</>
+					)}
+
+					{/* Joriy sahifa title */}
+					<li className="flex items-center">
+						<svg className="w-4 h-4 mx-1" fill="currentColor" viewBox="0 0 20 20">
+							<path fillRule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clipRule="evenodd" />
+						</svg>
+						<span className="text-blue-600 font-medium">
+							{pageData?.title || breadcrumbText[currentLang]?.about || breadcrumbText.uz.about}
+						</span>
+					</li>
+				</ol>
+			</nav>
+		)
+	}
+
 	// Loading state
 	if (loading) {
 		return (
@@ -95,29 +137,13 @@ const AboutUsNavigatsiya = () => {
 					<div className="max-w-7xl mx-auto">
 						{/* Breadcrumb Navigation */}
 						<div className="mb-6">
-							<nav className="flex" aria-label="Breadcrumb">
-								<ol className="flex items-center space-x-2 text-sm text-gray-500">
-									<li>
-										<a href="/" className="hover:text-blue-600 transition-colors duration-200">
-											{breadcrumbText[currentLang]?.home || breadcrumbText.uz.home}
-										</a>
-									</li>
-									<li className="flex items-center">
-										<svg className="w-4 h-4 mx-1" fill="currentColor" viewBox="0 0 20 20">
-											<path fillRule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clipRule="evenodd" />
-										</svg>
-										<span className="text-blue-600 font-medium">
-											{breadcrumbText[currentLang]?.about || breadcrumbText.uz.about}
-										</span>
-									</li>
-								</ol>
-							</nav>
+							{renderBreadcrumb()}
 						</div>
 
 						{/* Sarlavha Section */}
 						<div className="text-center mb-16">
 							<h1 className="text-4xl md:text-5xl font-bold text-gray-800 mb-6">
-								{sarlavha[currentLang] || sarlavha.uz}
+								{pageData?.title || sarlavha[currentLang] || sarlavha.uz}
 							</h1>
 							<div className="w-24 h-1 bg-blue-500 mx-auto rounded-full"></div>
 						</div>
@@ -153,33 +179,37 @@ const AboutUsNavigatsiya = () => {
 					<div className="max-w-7xl mx-auto">
 						{/* Breadcrumb Navigation */}
 						<div className="mb-6">
-							<nav className="flex" aria-label="Breadcrumb">
-								<ol className="flex items-center space-x-2 text-sm text-gray-500">
-									<li>
-										<a href="/" className="hover:text-blue-600 transition-colors duration-200">
-											{breadcrumbText[currentLang]?.home || breadcrumbText.uz.home}
-										</a>
-									</li>
-									<li className="flex items-center">
-										<svg className="w-4 h-4 mx-1" fill="currentColor" viewBox="0 0 20 20">
-											<path fillRule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clipRule="evenodd" />
-										</svg>
-										<span className="text-blue-600 font-medium">
-											{breadcrumbText[currentLang]?.about || breadcrumbText.uz.about}
-										</span>
-									</li>
-								</ol>
-							</nav>
+							{renderBreadcrumb()}
 						</div>
 
 						{/* Sarlavha Section */}
 						<div className="text-center mb-16">
 							<h1 className="text-4xl md:text-5xl font-bold text-gray-800 mb-6">
-								{sarlavha[currentLang] || sarlavha.uz}
+								{pageData?.title || sarlavha[currentLang] || sarlavha.uz}
 							</h1>
 							<div className="w-24 h-1 bg-blue-500 mx-auto rounded-full"></div>
 						</div>
 
+						{/* Error message */}
+						<div className="bg-white rounded-2xl shadow-xl p-8 md:p-12 text-center">
+							<div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
+								<svg className="w-8 h-8 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+									<path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+								</svg>
+							</div>
+							<h3 className="text-xl font-semibold text-gray-800 mb-2">
+								Xatolik yuz berdi
+							</h3>
+							<p className="text-gray-600 mb-4">
+								{error}
+							</p>
+							<button
+								onClick={() => window.location.reload()}
+								className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg transition-colors duration-200"
+							>
+								Qayta yuklash
+							</button>
+						</div>
 					</div>
 				</main>
 				<Footer />
@@ -197,29 +227,13 @@ const AboutUsNavigatsiya = () => {
 				<div className="max-w-7xl mx-auto">
 					{/* Breadcrumb Navigation */}
 					<div className="mb-6">
-						<nav className="flex" aria-label="Breadcrumb">
-							<ol className="flex items-center space-x-2 text-sm text-gray-500">
-								<li>
-									<a href="/" className="hover:text-blue-600 transition-colors duration-200">
-										{breadcrumbText[currentLang]?.home || breadcrumbText.uz.home}
-									</a>
-								</li>
-								<li className="flex items-center">
-									<svg className="w-4 h-4 mx-1" fill="currentColor" viewBox="0 0 20 20">
-										<path fillRule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clipRule="evenodd" />
-									</svg>
-									<span className="text-blue-600 font-medium">
-										{breadcrumbText[currentLang]?.about || breadcrumbText.uz.about}
-									</span>
-								</li>
-							</ol>
-						</nav>
+						{renderBreadcrumb()}
 					</div>
 
 					{/* Sarlavha Section - tilga mos */}
 					<div className="text-center mb-16">
 						<h1 className="text-4xl md:text-5xl font-bold text-gray-800 mb-6">
-							{sarlavha[currentLang] || sarlavha.uz}
+							{pageData?.title || sarlavha[currentLang] || sarlavha.uz}
 						</h1>
 						<div className="w-24 h-1 bg-blue-500 mx-auto rounded-full"></div>
 					</div>
@@ -263,10 +277,14 @@ const AboutUsNavigatsiya = () => {
 								</svg>
 							</div>
 							<h3 className="text-xl font-semibold text-gray-600 mb-2">
-								Ma'lumot topilmadi
+								{currentLang === 'uz' ? "Ma'lumot topilmadi" :
+									currentLang === 'ru' ? "Информация не найдена" :
+										"No information found"}
 							</h3>
 							<p className="text-gray-500">
-								Hozircha hech qanday ma'lumot mavjud emas.
+								{currentLang === 'uz' ? "Hozircha hech qanday ma'lumot mavjud emas." :
+									currentLang === 'ru' ? "Пока нет никакой информации." :
+										"No information is available yet."}
 							</p>
 						</div>
 					)}
@@ -279,4 +297,4 @@ const AboutUsNavigatsiya = () => {
 	)
 }
 
-export default AboutUsNavigatsiya
+export default StaticPage

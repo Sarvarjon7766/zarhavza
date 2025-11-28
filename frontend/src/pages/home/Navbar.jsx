@@ -1,3 +1,4 @@
+import axios from "axios"
 import { ChevronDown, Eye, Facebook, Instagram, MapPin, Moon, Send, Sun, X, Youtube } from "lucide-react"
 import { useEffect, useState } from "react"
 import { useNavigate } from "react-router-dom"
@@ -13,7 +14,11 @@ const Navbar = () => {
 		fontSize: 100,
 		theme: 'normal'
 	})
+	const [menuItems, setMenuItems] = useState([]) // API dan kelgan menyu
+	const [socialNetworks, setSocialNetworks] = useState([]) // API dan kelgan ijtimoiy tarmoqlar
 	const navigate = useNavigate()
+
+	const BASE_URL = import.meta.env.VITE_BASE_URL
 
 	// Scroll holatini kuzatish
 	useEffect(() => {
@@ -39,6 +44,44 @@ const Navbar = () => {
 		const savedLang = localStorage.getItem("lang") || "uz"
 		setLanguage(savedLang)
 	}, [])
+
+	// Backenddan menu ma'lumotlarini olish
+	useEffect(() => {
+		const fetchMenu = async () => {
+			try {
+				console.log("🔄 Fetching menu for language:", language)
+				const { data } = await axios.get(`${BASE_URL}/api/pages/getAll/${language}`)
+				console.log("📋 Menu data received:", data)
+
+				if (data.success) {
+					setMenuItems(data.data)
+				}
+			} catch (error) {
+				console.log("❌ Menu fetch error:", error)
+			}
+		}
+
+		fetchMenu()
+	}, [BASE_URL, language])
+
+	// Backenddan ijtimoiy tarmoqlarni olish
+	useEffect(() => {
+		const fetchSocialNetworks = async () => {
+			try {
+				console.log("🔄 Fetching social networks...")
+				const { data } = await axios.get(`${BASE_URL}/api/social-networks/getAll`)
+				console.log("📱 Social networks data received:", data)
+
+				if (data.success) {
+					setSocialNetworks(data.data)
+				}
+			} catch (error) {
+				console.log("❌ Social networks fetch error:", error)
+			}
+		}
+
+		fetchSocialNetworks()
+	}, [BASE_URL])
 
 	// LocalStorage'dan accessibility sozlamalarini o'qish
 	useEffect(() => {
@@ -108,6 +151,25 @@ const Navbar = () => {
 	const handleLanguageChange = (langCode) => {
 		setLanguage(langCode)
 		localStorage.setItem("lang", langCode)
+		// Til o'zgarganda menyuni qayta yuklash
+		window.dispatchEvent(new Event('languageChanged'))
+	}
+
+	// Navigate funksiyasi
+	const handleNavigate = (slug) => {
+		console.log("📍 Navigate to slug:", slug)
+		navigate(slug)
+		setMobileOpen(false)
+		setOpenMenu(null)
+		window.scrollTo({ top: 0, behavior: "smooth" })
+	}
+
+	// Home page ga o'tish
+	const handleHomeNavigate = () => {
+		navigate("/")
+		setMobileOpen(false)
+		setOpenMenu(null)
+		window.scrollTo({ top: 0, behavior: "smooth" })
 	}
 
 	// Maxsus Imkoniyatlar modalini ochish
@@ -149,19 +211,71 @@ const Navbar = () => {
 		applyAccessibilitySettings(defaultSettings)
 	}
 
+	// Menu itemlar uchun hover va click handlerlar
+	const handleMouseEnter = (id) => setOpenMenu(id)
+	const handleMouseLeave = () => setOpenMenu(null)
+
+	const toggleMenu = (id) => {
+		setOpenMenu((prev) => (prev === id ? null : id))
+	}
+
+	// Ijtimoiy tarmoq ikonkalarini olish
+	const getSocialIcon = (key) => {
+		switch (key) {
+			case 'facebook':
+				return <Facebook size={18} className="sm:w-5 sm:h-5 group-hover:scale-110" />
+			case 'telegram':
+				return <Send size={18} className="sm:w-5 sm:h-5 group-hover:scale-110" />
+			case 'youtube':
+				return <Youtube size={18} className="sm:w-5 sm:h-5 group-hover:scale-110" />
+			case 'instagram':
+				return <Instagram size={18} className="sm:w-5 sm:h-5 group-hover:scale-110" />
+			case 'location':
+				return <MapPin size={18} className="sm:w-5 sm:h-5 group-hover:scale-110" />
+			default:
+				return null
+		}
+	}
+
+	// Ijtimoiy tarmoq nomlarini olish
+	const getSocialTitle = (key) => {
+		switch (key) {
+			case 'facebook':
+				return "Facebook"
+			case 'telegram':
+				return "Telegram"
+			case 'youtube':
+				return "YouTube"
+			case 'instagram':
+				return "Instagram"
+			case 'location':
+				return "Lokatsiya"
+			default:
+				return "Ijtimoiy tarmoq"
+		}
+	}
+
+	// Ijtimoiy tarmoqlarni render qilish
+	const renderSocialNetworks = () => {
+		return socialNetworks.map((social) => (
+			<a
+				key={social._id}
+				href={social.link}
+				target="_blank"
+				rel="noopener noreferrer"
+				className="text-white hover:text-yellow-300 transition-all duration-300 p-1.5 sm:p-2 rounded-lg group"
+				title={getSocialTitle(social.key)}
+			>
+				{getSocialIcon(social.key)}
+			</a>
+		))
+	}
+
 	// Tarjima matnlari
 	const translations = {
 		uz: {
-			home: "Boshqarma haqida",
-			about: "Biz Haqimizda",
-			openData: "Ochiq Ma'lumot",
+			home: "Bosh sahifa",
 			contact: "Bog'lanish",
-			infoService: "Axborot xizmati",
-			announcements: "E'lonlar",
-			videoGallery: "Video galereya",
-			news: "Yangiliklar",
-			activity: "Faoliyat",
-			search: "Qidirish...",
 			samarkandRegion: "Samarqand viloyati",
 			zarafshonIrrigation: '"Zarafshon" irrigatsiya tizimi',
 			directorate: "Boshqarma",
@@ -178,16 +292,8 @@ const Navbar = () => {
 			percent: "%"
 		},
 		ru: {
-			home: "О Управлении",
-			about: "О Нас",
-			openData: "Открытые Данные",
+			home: "Главная",
 			contact: "Связь",
-			infoService: "Информационная служба",
-			announcements: "Объявления",
-			videoGallery: "Видеогалерея",
-			news: "Новости",
-			activity: "Деятельность",
-			search: "Поиск...",
 			samarkandRegion: "Самаркандская область",
 			zarafshonIrrigation: 'Ирригационная система "Зарафшан"',
 			directorate: "Управление",
@@ -204,16 +310,8 @@ const Navbar = () => {
 			percent: "%"
 		},
 		en: {
-			home: "About Directorate",
-			about: "About Us",
-			openData: "Open Data",
+			home: "Home",
 			contact: "Contact",
-			infoService: "Information Service",
-			announcements: "Announcements",
-			videoGallery: "Video Gallery",
-			news: "News",
-			activity: "Activity",
-			search: "Search...",
 			samarkandRegion: "Samarkand region",
 			zarafshonIrrigation: '"Zarafshon" irrigation system',
 			directorate: "Directorate",
@@ -233,19 +331,160 @@ const Navbar = () => {
 
 	const t = translations[language] || translations.uz
 
-	const toggleMenu = (menu) => {
-		setOpenMenu((prev) => (prev === menu ? null : menu))
-	}
+	// Menu itemlarni render qilish (Desktop)
+	const renderDesktopMenu = () => (
+		<ul className="flex items-center space-x-0 xl:space-x-1 font-semibold text-xs md:text-sm lg:text-base xl:text-lg">
+			{/* Bosh sahifa - har doim birinchi */}
+			<li
+				onClick={() => handleNavigate("/")}
+				className="text-white hover:text-yellow-300 hover:bg-blue-700/50 transition-all duration-300 py-3 lg:py-4 px-2 md:px-3 lg:px-4 xl:px-6 cursor-pointer rounded-lg group"
+			>
+				<span className="group-hover:scale-105 transition-transform block whitespace-nowrap">{t.home}</span>
+			</li>
 
-	const handleNavigate = (path) => {
-		navigate(path)
-		setMobileOpen(false)
-		setOpenMenu(null)
-		window.scrollTo({ top: 0, behavior: "smooth" })
-	}
+			{/* API dan kelgan menyu itemlari */}
+			{menuItems.map((item) => (
+				<li
+					key={item._id}
+					className="relative"
+					onMouseEnter={() => handleMouseEnter(item._id)}
+					onMouseLeave={handleMouseLeave}
+				>
+					<button
+						onClick={() => {
+							console.log("🖱️ Clicked menu item:", item.title, "slug:", item.slug)
+							if (item.children.length === 0) {
+								handleNavigate(item.slug)
+							}
+						}}
+						className="flex items-center gap-1 lg:gap-2 text-white hover:text-yellow-300 hover:bg-blue-700/50 py-3 lg:py-4 px-2 md:px-3 lg:px-4 xl:px-6 cursor-pointer rounded-lg transition-all duration-300 group whitespace-nowrap"
+					>
+						<span className="group-hover:scale-105 transition-transform text-xs md:text-sm lg:text-base xl:text-lg">
+							{item.title}
+						</span>
+						{item.children.length > 0 && (
+							<ChevronDown
+								size={14}
+								className={`transition-transform duration-300 ${openMenu === item._id ? "rotate-180 text-yellow-300" : "group-hover:scale-110"} w-3 h-3 md:w-4 md:h-4 lg:w-4 lg:h-4`}
+							/>
+						)}
+					</button>
 
-	const handleMouseEnter = (menu) => setOpenMenu(menu)
-	const handleMouseLeave = () => setOpenMenu(null)
+					{/* Dropdown menu */}
+					{item.children.length > 0 && openMenu === item._id && (
+						<div className="absolute left-0 top-full bg-white border border-gray-300 rounded-xl w-44 md:w-48 lg:w-52 xl:w-56 z-50 overflow-hidden shadow-md">
+							<ul className="p-2 space-y-1">
+								{item.children.map((child) => (
+									<li
+										key={child._id}
+										onClick={() => {
+											console.log("🖱️ Clicked child menu:", child.title, "slug:", child.slug)
+											handleNavigate(child.slug)
+										}}
+										className="flex items-center space-x-2 lg:space-x-3 hover:bg-gray-200 rounded-lg px-2 lg:px-3 py-2 lg:py-3 text-black cursor-pointer transition-all duration-200 group"
+									>
+										{child.icon && <span className="text-base lg:text-lg">{child.icon}</span>}
+										<span className="font-medium group-hover:text-blue-600 group-hover:translate-x-1 transition-transform text-xs md:text-sm lg:text-base">
+											{child.title}
+										</span>
+									</li>
+								))}
+							</ul>
+						</div>
+					)}
+				</li>
+			))}
+
+			{/* Bog'lanish - har doim oxirgi */}
+			<li
+				onClick={() => handleNavigate("/contact")}
+				className="text-white hover:text-yellow-300 hover:bg-blue-700/50 transition-all duration-300 py-3 lg:py-4 px-2 md:px-3 lg:px-4 xl:px-6 cursor-pointer rounded-lg group"
+			>
+				<span className="group-hover:scale-105 transition-transform block whitespace-nowrap">{t.contact}</span>
+			</li>
+		</ul>
+	)
+
+	// Menu itemlarni render qilish (Mobile)
+	const renderMobileMenu = () => (
+		<div className="px-3 py-3 space-y-0.5">
+			{/* Bosh sahifa - har doim birinchi */}
+			<div
+				onClick={() => handleNavigate("/")}
+				className="flex items-center space-x-3 py-2.5 px-3 text-white hover:text-yellow-300 hover:bg-blue-700/50 rounded-lg cursor-pointer text-sm transition-all duration-200 group"
+			>
+				<span className="text-lg">🏠</span>
+				<span className="group-hover:translate-x-1 transition-transform font-medium">
+					{t.home}
+				</span>
+			</div>
+
+			{/* API dan kelgan menyu itemlari */}
+			{menuItems.map((item) => (
+				<div key={item._id}>
+					{item.children.length === 0 ? (
+						<div
+							onClick={() => {
+								console.log("📱 Clicked mobile menu:", item.title, "slug:", item.slug)
+								handleNavigate(item.slug)
+							}}
+							className="flex items-center space-x-3 py-2.5 px-3 text-white hover:text-yellow-300 hover:bg-blue-700/50 rounded-lg cursor-pointer text-sm transition-all duration-200 group"
+						>
+							{item.icon && <span className="text-lg">{item.icon}</span>}
+							<span className="group-hover:translate-x-1 transition-transform font-medium">
+								{item.title}
+							</span>
+						</div>
+					) : (
+						<div>
+							<button
+								onClick={() => toggleMenu(`mobile-${item._id}`)}
+								className="flex justify-between items-center w-full py-2.5 px-3 text-white hover:text-yellow-300 hover:bg-blue-700/50 rounded-lg text-sm transition-all duration-200 group"
+							>
+								<div className="flex items-center space-x-3">
+									{item.icon && <span className="text-lg">{item.icon}</span>}
+									<span className="group-hover:translate-x-1 transition-transform font-medium">
+										{item.title}
+									</span>
+								</div>
+								<ChevronDown size={16} className={`transition-transform duration-300 ${openMenu === `mobile-${item._id}` ? "rotate-180 text-yellow-300" : ""}`} />
+							</button>
+							{openMenu === `mobile-${item._id}` && (
+								<ul className="pl-9 py-1.5 space-y-0.5 bg-white">
+									{item.children.map((child) => (
+										<li
+											key={child._id}
+											onClick={() => {
+												console.log("📱 Clicked mobile child:", child.title, "slug:", child.slug)
+												handleNavigate(child.slug)
+											}}
+											className="flex items-center space-x-3 py-2 text-black hover:text-blue-700 hover:bg-gray-200 cursor-pointer transition-all duration-200 group"
+										>
+											{child.icon && <span className="text-base">{child.icon}</span>}
+											<span className="font-medium group-hover:translate-x-1 transition-transform text-sm">
+												{child.title}
+											</span>
+										</li>
+									))}
+								</ul>
+							)}
+						</div>
+					)}
+				</div>
+			))}
+
+			{/* Bog'lanish - har doim oxirgi */}
+			<div
+				onClick={() => handleNavigate("/contact")}
+				className="flex items-center space-x-3 py-2.5 px-3 text-white hover:text-yellow-300 hover:bg-blue-700/50 rounded-lg cursor-pointer text-sm transition-all duration-200 group"
+			>
+				<span className="text-lg">📞</span>
+				<span className="group-hover:translate-x-1 transition-transform font-medium">
+					{t.contact}
+				</span>
+			</div>
+		</div>
+	)
 
 	// Background klassini dinamik ravishda o'zgartirish
 	const navBackgroundClass = isScrolled
@@ -269,18 +508,16 @@ const Navbar = () => {
 						{/* 🔹 Logo va Sarlavha */}
 						<div className="flex items-center space-x-3 sm:space-x-4">
 							<div
-								onClick={() => handleNavigate("/")}
+								onClick={handleHomeNavigate}
 								className="flex items-center space-x-2 sm:space-x-3 cursor-pointer group"
 							>
 								<img src="/logo.png" alt="Logo" className="h-12 sm:h-14 md:h-16 w-auto transition-transform group-hover:scale-105" />
 							</div>
 							<div className="hidden sm:block">
-								<div className={`text-sm md:text-lg lg:text-xl font-bold tracking-tight leading-tight transition-colors duration-500 ${isScrolled ? "text-white" : "text-white"
-									}`}>
+								<div className={`text-sm md:text-lg lg:text-xl font-bold tracking-tight leading-tight transition-colors duration-500 ${isScrolled ? "text-white" : "text-white"}`}>
 									{t.samarkandRegion}
 								</div>
-								<div className={`text-xs md:text-base lg:text-lg font-semibold mt-0.5 md:mt-1 opacity-90 leading-tight transition-colors duration-500 ${isScrolled ? "text-white" : "text-white"
-									}`}>
+								<div className={`text-xs md:text-base lg:text-lg font-semibold mt-0.5 md:mt-1 opacity-90 leading-tight transition-colors duration-500 ${isScrolled ? "text-white" : "text-white"}`}>
 									{t.zarafshonIrrigation}
 								</div>
 							</div>
@@ -339,23 +576,7 @@ const Navbar = () => {
 					<div className="flex items-center justify-end space-x-4 sm:space-x-6 pb-3 sm:pb-4">
 						{/* Ijtimoiy tarmoqlar */}
 						<div className="flex items-center space-x-3 sm:space-x-4 md:space-x-5">
-							<a href="#" className="text-white hover:text-yellow-300 transition-all duration-300 p-1.5 sm:p-2 rounded-lg group" title="Facebook">
-								<Facebook size={18} className="sm:w-5 sm:h-5 group-hover:scale-110" />
-							</a>
-							<a href="#" className="text-white hover:text-yellow-300 transition-all duration-300 p-1.5 sm:p-2 rounded-lg group" title="Telegram">
-								<Send size={18} className="sm:w-5 sm:h-5 group-hover:scale-110" />
-							</a>
-							<a href="#" className="text-white hover:text-yellow-300 transition-all duration-300 p-1.5 sm:p-2 rounded-lg group" title="YouTube">
-								<Youtube size={18} className="sm:w-5 sm:h-5 group-hover:scale-110" />
-							</a>
-							<a href="#" className="text-white hover:text-yellow-300 transition-all duration-300 p-1.5 sm:p-2 rounded-lg group" title="Instagram">
-								<Instagram size={18} className="sm:w-5 sm:h-5 group-hover:scale-110" />
-							</a>
-						</div>
-
-						{/* Lokatsiya - faqat icon */}
-						<div className="flex items-center text-white hover:text-yellow-300 transition-all duration-300 p-1.5 sm:p-2 rounded-lg group">
-							<MapPin size={18} className="sm:w-5 sm:h-5 group-hover:scale-110" />
+							{renderSocialNetworks()}
 						</div>
 					</div>
 				</div>
@@ -365,82 +586,7 @@ const Navbar = () => {
 			<div className={`hidden md:block transition-all duration-500 ${mainNavBackgroundClass}`}>
 				<div className="px-4 sm:px-6 lg:px-8 mx-auto">
 					<div className="flex justify-center items-center">
-						{/* 🔹 Desktop menyu */}
-						<ul className="flex items-center space-x-0 xl:space-x-1 font-semibold text-xs md:text-sm lg:text-base xl:text-lg">
-							<li
-								onClick={() => handleNavigate("/")}
-								className="text-white hover:text-yellow-300 hover:bg-blue-700/50 transition-all duration-300 py-3 lg:py-4 px-2 md:px-3 lg:px-4 xl:px-6 cursor-pointer rounded-lg group"
-							>
-								<span className="group-hover:scale-105 transition-transform block whitespace-nowrap">{t.home}</span>
-							</li>
-
-							<li
-								onClick={() => handleNavigate("/about-us")}
-								className="text-white hover:text-yellow-300 hover:bg-blue-700/50 transition-all duration-300 py-3 lg:py-4 px-2 md:px-3 lg:px-4 xl:px-6 cursor-pointer rounded-lg group"
-							>
-								<span className="group-hover:scale-105 transition-transform block whitespace-nowrap">{t.about}</span>
-							</li>
-
-							<li
-								onClick={() => handleNavigate("/open-data")}
-								className="text-white hover:text-yellow-300 hover:bg-blue-700/50 transition-all duration-300 py-3 lg:py-4 px-2 md:px-3 lg:px-4 xl:px-6 cursor-pointer rounded-lg group"
-							>
-								<span className="group-hover:scale-105 transition-transform block whitespace-nowrap">{t.openData}</span>
-							</li>
-
-							<li
-								onClick={() => handleNavigate("/contact")}
-								className="text-white hover:text-yellow-300 hover:bg-blue-700/50 transition-all duration-300 py-3 lg:py-4 px-2 md:px-3 lg:px-4 xl:px-6 cursor-pointer rounded-lg group"
-							>
-								<span className="group-hover:scale-105 transition-transform block whitespace-nowrap">{t.contact}</span>
-							</li>
-
-							{/* Axborot xizmati */}
-							<li
-								className="relative"
-								onMouseEnter={() => handleMouseEnter("info")}
-								onMouseLeave={handleMouseLeave}
-							>
-								<button className="flex items-center gap-1 lg:gap-2 text-white hover:text-yellow-300 hover:bg-blue-700/50 py-3 lg:py-4 px-2 md:px-3 lg:px-4 xl:px-6 cursor-pointer rounded-lg transition-all duration-300 group whitespace-nowrap">
-									<span className="group-hover:scale-105 transition-transform text-xs md:text-sm lg:text-base xl:text-lg">
-										{t.infoService}
-									</span>
-									<ChevronDown size={14} className={`transition-transform duration-300 ${openMenu === "info" ? "rotate-180 text-yellow-300" : "group-hover:scale-110"} w-3 h-3 md:w-4 md:h-4 lg:w-4 lg:h-4`} />
-								</button>
-
-								{openMenu === "info" && (
-									<div className="absolute left-0 top-full bg-white/10 backdrop-blur-md border border-white/20 rounded-xl w-44 md:w-48 lg:w-52 xl:w-56 z-50 overflow-hidden">
-										<ul className="p-2 space-y-1">
-											{[
-												{ path: "/announcements", text: t.announcements, icon: "📢" },
-												{ path: "/video-gallery", text: t.videoGallery, icon: "🎥" },
-												{ path: "/allnews", text: t.news, icon: "📰" },
-											].map((item) => (
-												<li
-													key={item.path}
-													onClick={() => handleNavigate(item.path)}
-													className="flex items-center space-x-2 lg:space-x-3 hover:bg-white/20 rounded-lg px-2 lg:px-3 py-2 lg:py-3 text-white cursor-pointer transition-all duration-200 group"
-												>
-													<span className="text-base lg:text-lg">{item.icon}</span>
-													<span className="font-medium group-hover:text-yellow-300 group-hover:translate-x-1 transition-transform text-xs md:text-sm lg:text-base">
-														{item.text}
-													</span>
-												</li>
-											))}
-										</ul>
-									</div>
-								)}
-							</li>
-
-							<li
-								onClick={() => handleNavigate("/activity")}
-								className="text-white hover:text-yellow-300 hover:bg-blue-700/50 transition-all duration-300 py-3 lg:py-4 px-2 md:px-3 lg:px-4 xl:px-6 cursor-pointer rounded-lg group"
-							>
-								<span className="group-hover:scale-105 transition-transform block whitespace-nowrap text-xs md:text-sm lg:text-base xl:text-lg">
-									{t.activity}
-								</span>
-							</li>
-						</ul>
+						{renderDesktopMenu()}
 					</div>
 				</div>
 			</div>
@@ -449,62 +595,7 @@ const Navbar = () => {
 			<div
 				className={`md:hidden border-t border-white/20 transition-all duration-500 overflow-hidden ${mobileNavBackgroundClass} ${mobileOpen ? "max-h-[800px] opacity-100" : "max-h-0 opacity-0"}`}
 			>
-				<div className="px-3 py-3 space-y-0.5">
-					{[
-						{ path: "/", text: t.home, icon: "🏠" },
-						{ path: "/about-us", text: t.about, icon: "👥" },
-						{ path: "/open-data", text: t.openData, icon: "📊" },
-						{ path: "/contact", text: t.contact, icon: "📞" },
-						{ path: "/activity", text: t.activity, icon: "⚡" },
-					].map((item) => (
-						<div
-							key={item.path}
-							onClick={() => handleNavigate(item.path)}
-							className="flex items-center space-x-3 py-2.5 px-3 text-white hover:text-yellow-300 hover:bg-blue-700/50 rounded-lg cursor-pointer text-sm transition-all duration-200 group"
-						>
-							<span className="text-lg">{item.icon}</span>
-							<span className="group-hover:translate-x-1 transition-transform font-medium">
-								{item.text}
-							</span>
-						</div>
-					))}
-
-					{/* Axborot xizmati mobil */}
-					<div className="border-t border-white/20 pt-1.5 mt-1.5">
-						<button
-							onClick={() => toggleMenu("info-mobile")}
-							className="flex justify-between items-center w-full py-2.5 px-3 text-white hover:text-yellow-300 hover:bg-blue-700/50 rounded-lg text-sm transition-all duration-200 group"
-						>
-							<div className="flex items-center space-x-3">
-								<span className="text-lg">ℹ️</span>
-								<span className="group-hover:translate-x-1 transition-transform font-medium">
-									{t.infoService}
-								</span>
-							</div>
-							<ChevronDown size={16} className={`transition-transform duration-300 ${openMenu === "info-mobile" ? "rotate-180 text-yellow-300" : ""}`} />
-						</button>
-						{openMenu === "info-mobile" && (
-							<ul className="pl-9 py-1.5 space-y-0.5">
-								{[
-									{ path: "/announcements", text: t.announcements, icon: "📢" },
-									{ path: "/video-gallery", text: t.videoGallery, icon: "🎥" },
-									{ path: "/allnews", text: t.news, icon: "📰" },
-								].map((item) => (
-									<li
-										key={item.path}
-										onClick={() => handleNavigate(item.path)}
-										className="flex items-center space-x-3 py-2 text-white hover:text-yellow-300 hover:bg-blue-700/50 cursor-pointer transition-all duration-200 group"
-									>
-										<span className="text-base">{item.icon}</span>
-										<span className="font-medium group-hover:translate-x-1 transition-transform text-sm">
-											{item.text}
-										</span>
-									</li>
-								))}
-							</ul>
-						)}
-					</div>
-				</div>
+				{renderMobileMenu()}
 			</div>
 
 			{/* Maxsus Imkoniyatlar Sidebar */}
@@ -537,7 +628,6 @@ const Navbar = () => {
 									}`}
 							>
 								<Sun size={20} />
-								<span>{t.normalTheme}</span>
 							</button>
 							<button
 								onClick={() => handleThemeChange('grayscale')}
@@ -547,7 +637,6 @@ const Navbar = () => {
 									}`}
 							>
 								<Moon size={20} />
-								<span>{t.grayscaleTheme}</span>
 							</button>
 						</div>
 					</div>

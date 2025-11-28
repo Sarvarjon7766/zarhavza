@@ -1,3 +1,4 @@
+import axios from "axios"
 import { ChevronDown, Eye, Moon, Sun, X } from "lucide-react"
 import { useEffect, useState } from "react"
 import { useNavigate } from "react-router-dom"
@@ -11,13 +12,35 @@ const Navbar = () => {
 		fontSize: 100,
 		theme: 'normal'
 	})
+	const [menuItems, setMenuItems] = useState([])
 	const navigate = useNavigate()
+
+	const BASE_URL = import.meta.env.VITE_BASE_URL
 
 	// LocalStorage'dan tilni o'qish
 	useEffect(() => {
 		const savedLang = localStorage.getItem("lang") || "uz"
 		setLanguage(savedLang)
 	}, [])
+
+	// Backenddan menu ma'lumotlarini olish
+	useEffect(() => {
+		const fetchMenu = async () => {
+			try {
+				console.log("🔄 Fetching menu for language:", language)
+				const { data } = await axios.get(`${BASE_URL}/api/pages/getAll/${language}`)
+				console.log("📋 Menu data received:", data)
+
+				if (data.success) {
+					setMenuItems(data.data)
+				}
+			} catch (error) {
+				console.log("❌ Menu fetch error:", error)
+			}
+		}
+
+		fetchMenu()
+	}, [BASE_URL, language])
 
 	// LocalStorage'dan accessibility sozlamalarini o'qish
 	useEffect(() => {
@@ -32,11 +55,8 @@ const Navbar = () => {
 	// Accessibility sozlamalarini qo'llash
 	const applyAccessibilitySettings = (settings) => {
 		const root = document.documentElement
-
-		// Shrift o'lchami
 		root.style.fontSize = `${settings.fontSize}%`
 
-		// Mavzu
 		if (settings.theme === 'grayscale') {
 			root.style.setProperty('--bg-color', '#ffffff')
 			root.style.setProperty('--text-color', '#000000')
@@ -44,7 +64,6 @@ const Navbar = () => {
 			root.style.setProperty('--secondary-color', '#333333')
 			root.style.filter = 'grayscale(100%)'
 		} else {
-			// Normal holat
 			root.style.setProperty('--bg-color', '')
 			root.style.setProperty('--text-color', '')
 			root.style.setProperty('--primary-color', '')
@@ -87,6 +106,24 @@ const Navbar = () => {
 	const handleLanguageChange = (langCode) => {
 		setLanguage(langCode)
 		localStorage.setItem("lang", langCode)
+		window.dispatchEvent(new Event('languageChanged'))
+	}
+
+	// Navigate funksiyasi
+	const handleNavigate = (slug) => {
+		console.log("📍 Navigate to slug:", slug)
+		navigate(slug)
+		setMobileOpen(false)
+		setOpenMenu(null)
+		window.scrollTo({ top: 0, behavior: "smooth" })
+	}
+
+	// Home page ga o'tish
+	const handleHomeNavigate = () => {
+		navigate("/")
+		setMobileOpen(false)
+		setOpenMenu(null)
+		window.scrollTo({ top: 0, behavior: "smooth" })
 	}
 
 	// Maxsus Imkoniyatlar modalini ochish
@@ -128,18 +165,19 @@ const Navbar = () => {
 		applyAccessibilitySettings(defaultSettings)
 	}
 
-	// Tarjima matnlari - Zarafshon irrigatsiya tizimlari boshqarmasi uchun
+	// Menu itemlar uchun hover va click handlerlar
+	const handleMouseEnter = (id) => setOpenMenu(id)
+	const handleMouseLeave = () => setOpenMenu(null)
+
+	const toggleMenu = (id) => {
+		setOpenMenu((prev) => (prev === id ? null : id))
+	}
+
+	// Tarjima matnlari
 	const translations = {
 		uz: {
-			home: "Boshqarma haqida",
-			about: "Biz Haqimizda",
-			openData: "Ochiq Ma'lumot",
+			home: "Bosh sahifa",
 			contact: "Bog'lanish",
-			infoService: "Axborot xizmati",
-			announcements: "E'lonlar",
-			videoGallery: "Video galereya",
-			news: "Yangiliklar",
-			activity: "Faoliyat",
 			samarkandRegion: "Samarqand viloyati",
 			zarafshonIrrigation: '"Zarafshon" irrigatsiya tizimi boshqarmasi',
 			accessibility: "Maxsus Imkoniyatlar",
@@ -156,14 +194,7 @@ const Navbar = () => {
 		},
 		ru: {
 			home: "Главная",
-			about: "О Нас",
-			openData: "Открытые Данные",
 			contact: "Связь",
-			infoService: "Информационная служба",
-			announcements: "Объявления",
-			videoGallery: "Видеогалерея",
-			news: "Новости",
-			activity: "Деятельность",
 			samarkandRegion: "Самаркандская область",
 			zarafshonIrrigation: 'Управление ирригационной системы "Зарафшан"',
 			accessibility: "Специальные Возможности",
@@ -179,15 +210,8 @@ const Navbar = () => {
 			percent: "%"
 		},
 		en: {
-			home: "Directorate",
-			about: "About Us",
-			openData: "Open Data",
+			home: "Home",
 			contact: "Contact",
-			infoService: "Information Service",
-			announcements: "Announcements",
-			videoGallery: "Video Gallery",
-			news: "News",
-			activity: "Activity",
 			samarkandRegion: "Samarkand region",
 			zarafshonIrrigation: '"Zarafshon" Irrigation System Administration',
 			accessibility: "Special Features",
@@ -206,19 +230,151 @@ const Navbar = () => {
 
 	const t = translations[language] || translations.uz
 
-	const toggleMenu = (menu) => {
-		setOpenMenu((prev) => (prev === menu ? null : menu))
-	}
+	// Menu itemlarni render qilish (Desktop)
+	const renderDesktopMenu = () => (
+		<ul className="flex items-center space-x-1 font-semibold text-sm">
+			{/* Bosh sahifa - har doim birinchi */}
+			<li
+				onClick={() => handleNavigate("/")}
+				className="text-white hover:text-yellow-300 hover:bg-blue-700/50 py-3 lg:py-4 px-2 md:px-3 lg:px-4 xl:px-6 cursor-pointer rounded-lg transition-all duration-300 group whitespace-nowrap"
+			>
+				<span className="group-hover:scale-105 transition-transform text-xs md:text-sm lg:text-base xl:text-lg">
+					{t.home}
+				</span>
+			</li>
 
-	const handleNavigate = (path) => {
-		navigate(path)
-		setMobileOpen(false)
-		setOpenMenu(null)
-		window.scrollTo({ top: 0, behavior: "smooth" })
-	}
+			{/* API dan kelgan menyu itemlari */}
+			{menuItems.map((item) => (
+				<li
+					key={item._id}
+					className="relative"
+					onMouseEnter={() => handleMouseEnter(item._id)}
+					onMouseLeave={handleMouseLeave}
+				>
+					<button
+						onClick={() => {
+							console.log("🖱️ Clicked menu item:", item.title, "slug:", item.slug)
+							if (item.children.length === 0) {
+								handleNavigate(item.slug)
+							}
+						}}
+						className="flex items-center gap-1 lg:gap-2 text-white hover:text-yellow-300 hover:bg-blue-700/50 py-3 lg:py-4 px-2 md:px-3 lg:px-4 xl:px-6 cursor-pointer rounded-lg transition-all duration-300 group whitespace-nowrap"
+					>
+						<span className="group-hover:scale-105 transition-transform text-xs md:text-sm lg:text-base xl:text-lg">
+							{item.title}
+						</span>
+						{item.children.length > 0 && (
+							<ChevronDown
+								size={14}
+								className={`transition-transform duration-300 ${openMenu === item._id ? "rotate-180 text-yellow-300" : "group-hover:scale-110"} w-3 h-3 md:w-4 md:h-4 lg:w-4 lg:h-4`}
+							/>
+						)}
+					</button>
 
-	const handleMouseEnter = (menu) => setOpenMenu(menu)
-	const handleMouseLeave = () => setOpenMenu(null)
+					{/* Dropdown menu */}
+					{item.children.length > 0 && openMenu === item._id && (
+						<div className="absolute left-0 top-full bg-white border border-gray-300 rounded-xl w-44 md:w-48 lg:w-52 xl:w-56 z-50 overflow-hidden shadow-md">
+							<ul className="p-2 space-y-1">
+								{item.children.map((child) => (
+									<li
+										key={child._id}
+										onClick={() => {
+											console.log("🖱️ Clicked child menu:", child.title, "slug:", child.slug)
+											handleNavigate(child.slug)
+										}}
+										className="flex items-center space-x-2 lg:space-x-3 hover:bg-gray-200 rounded-lg px-2 lg:px-3 py-2 lg:py-3 text-black cursor-pointer transition-all duration-200 group"
+									>
+										{child.icon && <span className="text-base lg:text-lg">{child.icon}</span>}
+										<span className="font-medium group-hover:text-blue-600 group-hover:translate-x-1 transition-transform text-xs md:text-sm lg:text-base">
+											{child.title}
+										</span>
+									</li>
+								))}
+							</ul>
+						</div>
+					)}
+				</li>
+			))}
+
+			{/* Bog'lanish - har doim oxirgi */}
+			<li
+				onClick={() => handleNavigate("/contact")}
+				className="text-white hover:text-yellow-300 hover:bg-blue-700/50 py-3 lg:py-4 px-2 md:px-3 lg:px-4 xl:px-6 cursor-pointer rounded-lg transition-all duration-300 group whitespace-nowrap"
+			>
+				<span className="group-hover:scale-105 transition-transform text-xs md:text-sm lg:text-base xl:text-lg">
+					{t.contact}
+				</span>
+			</li>
+		</ul>
+	)
+
+	// Menu itemlarni render qilish (Mobile)
+	const renderMobileMenu = () => (
+		<div className="py-3 space-y-1">
+			{/* Bosh sahifa - har doim birinchi */}
+			<div
+				onClick={() => handleNavigate("/")}
+				className="py-2 px-3 text-white hover:text-yellow-300 hover:bg-blue-700 rounded-lg cursor-pointer transition-all duration-200"
+			>
+				<span className="font-medium text-sm">{t.home}</span>
+			</div>
+
+			{/* API dan kelgan menyu itemlari */}
+			{menuItems.map((item) => (
+				<div key={item._id}>
+					{item.children.length === 0 ? (
+						<div
+							onClick={() => {
+								console.log("📱 Clicked mobile menu:", item.title, "slug:", item.slug)
+								handleNavigate(item.slug)
+							}}
+							className="py-2 px-3 text-white hover:text-yellow-300 hover:bg-blue-700 rounded-lg cursor-pointer transition-all duration-200"
+						>
+							<span className="font-medium text-sm">{item.title}</span>
+						</div>
+					) : (
+						<div>
+							<button
+								onClick={() => toggleMenu(`mobile-${item._id}`)}
+								className="flex justify-between items-center w-full py-2 px-3 text-white hover:text-yellow-300 hover:bg-blue-700 rounded-lg transition-all duration-200"
+							>
+								<span className="font-medium text-sm">{item.title}</span>
+								<ChevronDown
+									size={16}
+									className={`transition-transform duration-300 ${openMenu === `mobile-${item._id}` ? "rotate-180 text-yellow-300" : ""
+										}`}
+								/>
+							</button>
+							{openMenu === `mobile-${item._id}` && (
+								<ul className="pl-4 py-2 space-y-1">
+									{item.children.map((child) => (
+										<li
+											key={child._id}
+											onClick={() => {
+												console.log("📱 Clicked mobile child:", child.title, "slug:", child.slug)
+												handleNavigate(child.slug)
+											}}
+											className="py-2 px-3 text-white hover:text-yellow-300 hover:bg-blue-700 rounded cursor-pointer transition-all duration-200"
+										>
+											<span className="font-medium text-sm">{child.title}</span>
+										</li>
+									))}
+								</ul>
+							)}
+						</div>
+					)}
+				</div>
+			))}
+
+			{/* Bog'lanish - har doim oxirgi */}
+			<div
+				onClick={() => handleNavigate("/contact")}
+				className="py-2 px-3 text-white hover:text-yellow-300 hover:bg-blue-700 rounded-lg cursor-pointer transition-all duration-200"
+			>
+				<span className="font-medium text-sm">{t.contact}</span>
+			</div>
+		</div>
+	)
 
 	return (
 		<nav className="sticky top-0 z-50 bg-gradient-to-r from-blue-900 to-blue-800 shadow-lg border-b-2 border-blue-700">
@@ -227,11 +383,12 @@ const Navbar = () => {
 				<div className="flex items-center justify-between py-3">
 					{/* Logo */}
 					<div
-						onClick={() => handleNavigate("/")}
+						onClick={handleHomeNavigate}
 						className="flex items-center space-x-3 cursor-pointer group"
 					>
 						<img src="/logo.png" alt="Logo" className="h-10 sm:h-12 w-auto transition-transform group-hover:scale-105" />
-						<div className="hidden sm:block">
+						{/* Logo yonidagi yozuv - faqat xl ekranlarda ko'rinadi */}
+						<div className="hidden xl:block">
 							<div className="text-sm md:text-base font-bold text-white leading-tight">
 								{t.samarkandRegion}
 							</div>
@@ -241,86 +398,13 @@ const Navbar = () => {
 						</div>
 					</div>
 
-					{/* Asosiy navigatsiya menyusi */}
+					{/* Asosiy navigatsiya menyusi - backend ma'lumotlari asosida */}
 					<div className="hidden md:flex items-center space-x-1 lg:space-x-2">
-						<ul className="flex items-center space-x-1 font-semibold text-sm">
-							<li
-								onClick={() => handleNavigate("/")}
-								className="text-white hover:text-yellow-300 hover:bg-blue-700 transition-all duration-300 py-2 px-3 lg:px-4 cursor-pointer rounded-lg group"
-							>
-								<span className="group-hover:scale-105 transition-transform whitespace-nowrap">{t.home}</span>
-							</li>
-
-							<li
-								onClick={() => handleNavigate("/about-us")}
-								className="text-white hover:text-yellow-300 hover:bg-blue-700 transition-all duration-300 py-2 px-3 lg:px-4 cursor-pointer rounded-lg group"
-							>
-								<span className="group-hover:scale-105 transition-transform whitespace-nowrap">{t.about}</span>
-							</li>
-
-
-
-							<li
-								onClick={() => handleNavigate("/open-data")}
-								className="text-white hover:text-yellow-300 hover:bg-blue-700 transition-all duration-300 py-2 px-3 lg:px-4 cursor-pointer rounded-lg group"
-							>
-								<span className="group-hover:scale-105 transition-transform whitespace-nowrap">{t.openData}</span>
-							</li>
-							<li
-								onClick={() => handleNavigate("/contact")}
-								className="text-white hover:text-yellow-300 hover:bg-blue-700 transition-all duration-300 py-2 px-3 lg:px-4 cursor-pointer rounded-lg group"
-							>
-								<span className="group-hover:scale-105 transition-transform whitespace-nowrap">{t.contact}</span>
-							</li>
-							{/* Axborot xizmati */}
-							<li
-								className="relative"
-								onMouseEnter={() => handleMouseEnter("info")}
-								onMouseLeave={handleMouseLeave}
-							>
-								<button className="flex items-center gap-1 text-white hover:text-yellow-300 hover:bg-blue-700 py-2 px-3 lg:px-4 cursor-pointer rounded-lg transition-all duration-300 group whitespace-nowrap">
-									<span className="group-hover:scale-105 transition-transform text-sm">
-										{t.infoService}
-									</span>
-									<ChevronDown size={14} className={`transition-transform duration-300 ${openMenu === "info" ? "rotate-180 text-yellow-300" : "group-hover:scale-110"}`} />
-								</button>
-
-								{openMenu === "info" && (
-									<div className="absolute left-0 top-full bg-white border border-gray-300 rounded-lg w-48 z-50 overflow-hidden shadow-lg">
-										<ul className="p-2 space-y-1">
-											{[
-												{ path: "/announcements", text: t.announcements },
-												{ path: "/video-gallery", text: t.videoGallery },
-												{ path: "/allnews", text: t.news },
-											].map((item) => (
-												<li
-													key={item.path}
-													onClick={() => handleNavigate(item.path)}
-													className="hover:bg-blue-50 rounded-lg px-3 py-2 text-gray-800 cursor-pointer transition-all duration-200 group"
-												>
-													<span className="font-medium group-hover:text-blue-600 transition-colors text-sm">
-														{item.text}
-													</span>
-												</li>
-											))}
-										</ul>
-									</div>
-								)}
-							</li>
-
-							<li
-								onClick={() => handleNavigate("/activity")}
-								className="text-white hover:text-yellow-300 hover:bg-blue-700 transition-all duration-300 py-2 px-3 lg:px-4 cursor-pointer rounded-lg group"
-							>
-								<span className="group-hover:scale-105 transition-transform whitespace-nowrap">{t.activity}</span>
-							</li>
-
-
-						</ul>
+						{renderDesktopMenu()}
 					</div>
 
 					{/* Til tanlash va mobil menyu */}
-					<div className="flex items-center space-x-3">
+					<div className="flex items-center space-x-2 sm:space-x-3">
 						{/* Maxsus Imkoniyatlar tugmasi */}
 						<button
 							onClick={handleAccessibilityClick}
@@ -330,21 +414,34 @@ const Navbar = () => {
 							<Eye size={18} className="group-hover:scale-110 transition-transform" />
 						</button>
 
-						{/* Til tanlash */}
+						{/* Til tanlash - responsive versiya */}
 						<div className="relative">
+							{/* Katta ekranlar uchun to'liq tanlov */}
 							<select
 								value={language}
 								onChange={(e) => handleLanguageChange(e.target.value)}
-								className="appearance-none bg-white border border-gray-300 rounded-lg px-3 py-1.5 pr-8 focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-800 hover:border-gray-400 transition-colors cursor-pointer text-sm font-medium"
+								className="hidden sm:block appearance-none bg-white border border-gray-300 rounded-lg px-3 py-1.5 pr-8 focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-800 hover:border-gray-400 transition-colors cursor-pointer text-sm font-medium min-w-[120px]"
 							>
 								<option value="uz" className="text-gray-700 bg-white">O'zbekcha</option>
 								<option value="ru" className="text-gray-700 bg-white">Русский</option>
 								<option value="en" className="text-gray-700 bg-white">English</option>
 							</select>
-							<ChevronDown size={16} className="absolute right-2 top-1/2 transform -translate-y-1/2 text-gray-600 pointer-events-none" />
+
+							{/* Kichik ekranlar uchun qisqartirilgan tanlov */}
+							<select
+								value={language}
+								onChange={(e) => handleLanguageChange(e.target.value)}
+								className="sm:hidden appearance-none bg-white border border-gray-300 rounded-lg px-2 py-1.5 pr-6 focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-800 hover:border-gray-400 transition-colors cursor-pointer text-xs font-medium min-w-[60px]"
+							>
+								<option value="uz" className="text-gray-700 bg-white">UZ</option>
+								<option value="ru" className="text-gray-700 bg-white">RU</option>
+								<option value="en" className="text-gray-700 bg-white">EN</option>
+							</select>
+
+							<ChevronDown size={14} className="absolute right-1.5 sm:right-2 top-1/2 transform -translate-y-1/2 text-gray-600 pointer-events-none" />
 						</div>
 
-						{/* Mobil menyu tugmasi */}
+						{/* Mobil menyu tugmasi - faqat md dan kichik ekranlarda */}
 						<button
 							className="md:hidden p-2 rounded-lg border border-white/30 text-white hover:text-yellow-300 hover:border-yellow-300 transition-all duration-300"
 							onClick={() => setMobileOpen((prev) => !prev)}
@@ -360,7 +457,7 @@ const Navbar = () => {
 					</div>
 				</div>
 
-				{/* Mobil menyu - Yangilangan qism */}
+				{/* Mobil menyu - Backend ma'lumotlari asosida */}
 				<div
 					className={`md:hidden border-t border-white/20 transition-all duration-300 ${mobileOpen ? "max-h-[500px] opacity-100 pb-3" : "max-h-0 opacity-0"}`}
 					style={{
@@ -368,51 +465,7 @@ const Navbar = () => {
 						zIndex: 1000
 					}}
 				>
-					<div className="py-3 space-y-1">
-						{[
-							{ path: "/", text: t.home },
-							{ path: "/about-us", text: t.about },
-							{ path: "/open-data", text: t.openData },
-							{ path: "/activity", text: t.activity },
-							{ path: "/contact", text: t.contact },
-						].map((item) => (
-							<div
-								key={item.path}
-								onClick={() => handleNavigate(item.path)}
-								className="py-2 px-3 text-white hover:text-yellow-300 hover:bg-blue-700 rounded-lg cursor-pointer transition-all duration-200"
-							>
-								<span className="font-medium text-sm">{item.text}</span>
-							</div>
-						))}
-
-						{/* Axborot xizmati mobil */}
-						<div className="border-t border-white/20 pt-2 mt-2">
-							<button
-								onClick={() => toggleMenu("info-mobile")}
-								className="flex justify-between items-center w-full py-2 px-3 text-white hover:text-yellow-300 hover:bg-blue-700 rounded-lg transition-all duration-200"
-							>
-								<span className="font-medium text-sm">{t.infoService}</span>
-								<ChevronDown size={16} className={`transition-transform duration-300 ${openMenu === "info-mobile" ? "rotate-180 text-yellow-300" : ""}`} />
-							</button>
-							{openMenu === "info-mobile" && (
-								<ul className="pl-4 py-2 space-y-1">
-									{[
-										{ path: "/announcements", text: t.announcements },
-										{ path: "/video-gallery", text: t.videoGallery },
-										{ path: "/news", text: t.news },
-									].map((item) => (
-										<li
-											key={item.path}
-											onClick={() => handleNavigate(item.path)}
-											className="py-2 px-3 text-white hover:text-yellow-300 hover:bg-blue-700 rounded cursor-pointer transition-all duration-200"
-										>
-											<span className="font-medium text-sm">{item.text}</span>
-										</li>
-									))}
-								</ul>
-							)}
-						</div>
-					</div>
+					{renderMobileMenu()}
 				</div>
 			</div>
 
@@ -446,7 +499,6 @@ const Navbar = () => {
 									}`}
 							>
 								<Sun size={20} />
-								<span>{t.normalTheme}</span>
 							</button>
 							<button
 								onClick={() => handleThemeChange('grayscale')}
@@ -456,7 +508,6 @@ const Navbar = () => {
 									}`}
 							>
 								<Moon size={20} />
-								<span>{t.grayscaleTheme}</span>
 							</button>
 						</div>
 					</div>

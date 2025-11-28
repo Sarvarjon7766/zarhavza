@@ -67,18 +67,21 @@ const News = () => {
 	const getImageUrl = (photo) => {
 		if (!photo) return "/partner2.jpg"
 
-		// Agar public papkadagi rasm bo'lsa (slash bilan boshlansa)
-		if (photo.startsWith('/')) {
-			return photo
-		}
-
 		// Agar to'liq URL bo'lsa
 		if (photo.startsWith('http')) {
 			return photo
 		}
 
-		// Agar API dan kelgan rasm bo'lsa
-		return `${BASE_URL}${photo.startsWith('/') ? '' : '/'}${photo}`
+		// Agar slash bilan boshlanmasa, qo'shamiz
+		const normalizedPhoto = photo.startsWith('/') ? photo : `/${photo}`
+
+		// Agar uploads papkasidagi rasm bo'lsa, BASE_URL bilan birlashtiramiz
+		if (normalizedPhoto.startsWith('/uploads/')) {
+			return `${BASE_URL}${normalizedPhoto}`
+		}
+
+		// Boshqa holatlar (public rasmlar)
+		return normalizedPhoto
 	}
 
 	// Sana formatini o'zgartirish (2025-11-05T06:24:56.464Z -> 2025-11-05)
@@ -203,9 +206,10 @@ const News = () => {
 				<div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8 mb-8 sm:mb-12 lg:mb-16">
 					{displayedNews.map((item, index) => {
 						const photoUrl = getImageUrl(getRandomPhoto(item.photos))
+						console.log('Rasm URL:', photoUrl) // Debug uchun
 						return (
 							<div
-								key={item.id || index}
+								key={item._id || item.id || index}
 								className="group bg-white rounded-xl sm:rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-1 sm:hover:-translate-y-2 overflow-hidden border border-gray-200"
 							>
 								{/* Rasm qismi */}
@@ -216,6 +220,7 @@ const News = () => {
 										className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
 										onError={(e) => {
 											// Agar rasm yuklanmasa, default rasmni ko'rsatish
+											console.error('Rasm yuklanmadi:', photoUrl)
 											e.target.src = '/partner2.jpg'
 										}}
 									/>
@@ -237,7 +242,7 @@ const News = () => {
 										</div>
 										<div className="flex items-center gap-1 text-gray-500 text-xs sm:text-sm">
 											<Eye size={14} className="sm:w-4 sm:h-4" />
-											<span>{item.views}</span>
+											<span>{item.views || 0}</span>
 										</div>
 									</div>
 

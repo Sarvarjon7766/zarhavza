@@ -1,10 +1,10 @@
 import { useEffect, useState } from 'react'
-import Footer from '../component/Footer'
-import Navbar from '../component/Navbar'
+import Footer from './component/Footer'
+import Navbar from './component/Navbar'
 
 const BASE_URL = import.meta.env.VITE_BASE_URL
 
-const AnnouncementsNavigate = () => {
+const DocumentsPage = ({ pageData }) => {
 	// State for current language
 	const [currentLang, setCurrentLang] = useState(localStorage.getItem('lang') || 'uz')
 	const [announcements, setAnnouncements] = useState([])
@@ -73,7 +73,7 @@ const AnnouncementsNavigate = () => {
 	const fetchAnnouncements = async () => {
 		try {
 			setLoading(true)
-			const response = await fetch(`${BASE_URL}/api/announcement/getAll/${currentLang}`)
+			const response = await fetch(`${BASE_URL}/api/generalannouncement/getAll/${currentLang}/${pageData.key}`)
 
 			if (!response.ok) {
 				console.log("E'lonlarni olishda xatolik:", response.status)
@@ -258,6 +258,48 @@ const AnnouncementsNavigate = () => {
 		)
 	}
 
+	// Breadcrumb navigation render qilish
+	const renderBreadcrumb = () => {
+		const homeText = breadcrumbText[currentLang]?.home || breadcrumbText.uz.home
+
+		return (
+			<nav className="flex" aria-label="Breadcrumb">
+				<ol className="flex items-center space-x-2 text-sm text-gray-500">
+					{/* Bosh sahifa */}
+					<li>
+						<a href="/" className="hover:text-blue-600 transition-colors duration-200">
+							{homeText}
+						</a>
+					</li>
+
+					{/* ParentTitle bo'lsa */}
+					{pageData?.parentTitle && (
+						<>
+							<li className="flex items-center">
+								<svg className="w-4 h-4 mx-1" fill="currentColor" viewBox="0 0 20 20">
+									<path fillRule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clipRule="evenodd" />
+								</svg>
+								<span className="text-gray-500 hover:text-blue-600 transition-colors duration-200">
+									{pageData.parentTitle}
+								</span>
+							</li>
+						</>
+					)}
+
+					{/* Joriy sahifa title */}
+					<li className="flex items-center">
+						<svg className="w-4 h-4 mx-1" fill="currentColor" viewBox="0 0 20 20">
+							<path fillRule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clipRule="evenodd" />
+						</svg>
+						<span className="text-blue-600 font-medium">
+							{pageData?.title || breadcrumbText[currentLang]?.announcements || breadcrumbText.uz.announcements}
+						</span>
+					</li>
+				</ol>
+			</nav>
+		)
+	}
+
 	// Loading state
 	if (loading) {
 		return (
@@ -267,31 +309,7 @@ const AnnouncementsNavigate = () => {
 					<div className="mx-auto">
 						{/* Breadcrumb Navigation */}
 						<div className="mb-6">
-							<nav className="flex" aria-label="Breadcrumb">
-								<ol className="flex items-center space-x-2 text-sm text-gray-500">
-									<li>
-										<a href="/" className="hover:text-blue-600 transition-colors duration-200">
-											{breadcrumbText[currentLang]?.home || breadcrumbText.uz.home}
-										</a>
-									</li>
-									<li className="flex items-center">
-										<svg className="w-4 h-4 mx-1" fill="currentColor" viewBox="0 0 20 20">
-											<path fillRule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clipRule="evenodd" />
-										</svg>
-										<a href="/announcements" className="hover:text-blue-600 transition-colors duration-200">
-											{breadcrumbText[currentLang]?.informationService || breadcrumbText.uz.informationService}
-										</a>
-									</li>
-									<li className="flex items-center">
-										<svg className="w-4 h-4 mx-1" fill="currentColor" viewBox="0 0 20 20">
-											<path fillRule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clipRule="evenodd" />
-										</svg>
-										<span className="text-blue-600 font-medium">
-											{breadcrumbText[currentLang]?.announcements || breadcrumbText.uz.announcements}
-										</span>
-									</li>
-								</ol>
-							</nav>
+							{renderBreadcrumb()}
 						</div>
 
 						{/* Sarlavha Section */}
@@ -328,7 +346,7 @@ const AnnouncementsNavigate = () => {
 			{/* Image Modal */}
 			{selectedImage && currentAnnouncement && (
 				<div className="fixed inset-0 bg-black/90 z-50 flex items-center justify-center p-4">
-					<div className="relative  max-h-full w-full">
+					<div className="relative max-h-full w-full">
 						{/* Close button */}
 						<button
 							onClick={closeModal}
@@ -411,79 +429,57 @@ const AnnouncementsNavigate = () => {
 				<div className="max-w-7xl mx-auto">
 					{/* Breadcrumb Navigation */}
 					<div className="mb-6">
-						<nav className="flex" aria-label="Breadcrumb">
-							<ol className="flex items-center space-x-2 text-sm text-gray-500">
-								<li>
-									<a href="/" className="hover:text-blue-600 transition-colors duration-200">
-										{breadcrumbText[currentLang]?.home || breadcrumbText.uz.home}
-									</a>
-								</li>
-								<li className="flex items-center">
-									<svg className="w-4 h-4 mx-1" fill="currentColor" viewBox="0 0 20 20">
-										<path fillRule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clipRule="evenodd" />
-									</svg>
-									<a href="/announcements" className="hover:text-blue-600 transition-colors duration-200">
-										{breadcrumbText[currentLang]?.informationService || breadcrumbText.uz.informationService}
-									</a>
-								</li>
-								<li className="flex items-center">
-									<svg className="w-4 h-4 mx-1" fill="currentColor" viewBox="0 0 20 20">
-										<path fillRule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clipRule="evenodd" />
-									</svg>
-									<span className="text-blue-600 font-medium">
-										{breadcrumbText[currentLang]?.announcements || breadcrumbText.uz.announcements}
-									</span>
-								</li>
-							</ol>
-						</nav>
+						{renderBreadcrumb()}
 					</div>
 
 					{/* Sarlavha Section */}
 					<div className="text-center mb-16">
 						<h1 className="text-4xl md:text-5xl font-bold text-gray-800 mb-6 bg-gray-800 bg-clip-text text-transparent">
-							{t.title}
+							{pageData?.title || t.title}
 						</h1>
 						<div className="w-32 h-1 bg-gray-800 mx-auto rounded-full shadow-lg"></div>
-						<div className="mt-4">
-
-						</div>
 					</div>
 
 					{/* Content Section */}
 					<div className="space-y-8">
-						{announcements.map((item, index) => (
-							<div
-								key={item._id}
-								className="bg-white rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-500 overflow-hidden border border-gray-100"
-								style={{
-									animationDelay: `${index * 100}ms`,
-									animation: 'fadeInUp 0.6s ease-out'
-								}}
-							>
-								{/* Photos Section */}
-								{item.photos && item.photos.length > 0 && (
-									<div className="p-6 pb-0">
-										{renderImages(item)}
+						{announcements.length > 0 ? (
+							announcements.map((item, index) => (
+								<div
+									key={item._id}
+									className="bg-white rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-500 overflow-hidden border border-gray-100"
+									style={{
+										animationDelay: `${index * 100}ms`,
+										animation: 'fadeInUp 0.6s ease-out'
+									}}
+								>
+									{/* Photos Section */}
+									{item.photos && item.photos.length > 0 && (
+										<div className="p-6 pb-0">
+											{renderImages(item)}
+										</div>
+									)}
+
+									{/* Content Section */}
+									<div className="p-6">
+										{/* Title */}
+										<h2 className="text-2xl md:text-3xl font-bold text-gray-800 mb-4 leading-tight">
+											{item.title || "Sarlavha yo'q"}
+										</h2>
+
+										{/* Description */}
+										<div className="prose prose-lg max-w-none mb-6">
+											<p className="text-gray-700 leading-relaxed text-justify text-lg">
+												{item.description || "Tavsif mavjud emas"}
+											</p>
+										</div>
 									</div>
-								)}
-
-								{/* Content Section */}
-								<div className="p-6">
-									{/* Title */}
-									<h2 className="text-2xl md:text-3xl font-bold text-gray-800 mb-4 leading-tight">
-										{item.title || "Sarlavha yo'q"}
-									</h2>
-
-									{/* Description */}
-									<div className="prose prose-lg max-w-none mb-6">
-										<p className="text-gray-700 leading-relaxed text-justify text-lg">
-											{item.description || "Tavsif mavjud emas"}
-										</p>
-									</div>
-
 								</div>
+							))
+						) : (
+							<div className="text-center py-12">
+								<p className="text-gray-500 text-lg">{t.noData}</p>
 							</div>
-						))}
+						)}
 					</div>
 				</div>
 			</main>
@@ -508,4 +504,4 @@ const AnnouncementsNavigate = () => {
 	)
 }
 
-export default AnnouncementsNavigate
+export default DocumentsPage

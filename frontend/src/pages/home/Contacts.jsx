@@ -15,34 +15,161 @@ const Contacts = () => {
 	const [language, setLanguage] = useState("uz")
 	const [locations, setLocations] = useState([])
 	const [loadingLocations, setLoadingLocations] = useState(true)
+	const [contactData, setContactData] = useState(null)
+	const [loadingContact, setLoadingContact] = useState(true)
 	const BASE_URL = import.meta.env.VITE_BASE_URL
 	const mapInstance = useRef(null)
 
-	// Tilni boshqarish
+	// Tilni boshqarish - yangilangan versiya
 	useEffect(() => {
+		// Dastlabki tilni o'rnatish
 		const savedLang = localStorage.getItem("lang") || "uz"
 		setLanguage(savedLang)
 
-		const handleStorageChange = () => {
+		// Til o'zgarishini kuzatish
+		const handleLanguageChange = () => {
 			const newLang = localStorage.getItem("lang") || "uz"
-			setLanguage(newLang)
+			if (newLang !== language) {
+				setLanguage(newLang)
+			}
 		}
 
-		window.addEventListener('storage', handleStorageChange)
-		return () => window.removeEventListener('storage', handleStorageChange)
-	}, [])
+		// Custom event qo'shish
+		const handleCustomLanguageChange = () => {
+			handleLanguageChange()
+		}
 
-	// Lokatsiyalarni API'dan olish
+		// Storage o'zgarishini kuzatish
+		window.addEventListener('storage', handleLanguageChange)
+		// Custom event ni kuzatish
+		window.addEventListener('languageChanged', handleCustomLanguageChange)
+
+		// Interval orqali tekshirish (qo'shimcha xavfsizlik)
+		const interval = setInterval(handleLanguageChange, 500)
+
+		return () => {
+			window.removeEventListener('storage', handleLanguageChange)
+			window.removeEventListener('languageChanged', handleCustomLanguageChange)
+			clearInterval(interval)
+		}
+	}, [language]) // language dependency qo'shildi
+
+	// Kontakt ma'lumotlarini API'dan olish - language o'zgarganda yangilansin
 	useEffect(() => {
-		fetchLocations()
+		if (language) {
+			fetchContactData()
+		}
 	}, [language])
+
+	// Lokatsiyalarni API'dan olish - language o'zgarganda yangilansin
+	useEffect(() => {
+		if (language) {
+			fetchLocations()
+		}
+	}, [language])
+
+	// Kontakt ma'lumotlarini olish
+	const fetchContactData = async () => {
+		try {
+			setLoadingContact(true)
+			console.log("🔄 Fetching contact data for language:", language)
+			const response = await axios.get(`${BASE_URL}/api/contact/getActive/${language}`)
+
+			if (response.data.success) {
+				console.log("✅ Contact data received:", response.data.contact)
+				setContactData(response.data.contact)
+			} else {
+				console.error("Kontakt ma'lumotlarini olishda xatolik:", response.data.message)
+				// Agar API'dan ma'lumot olinmasa, standart ma'lumotlarni ko'rsatish
+				setContactData(getDefaultContactData())
+			}
+		} catch (error) {
+			console.error("Kontakt ma'lumotlarini yuklashda xatolik:", error)
+			// Xatolik yuz bersa, standart ma'lumotlarni ko'rsatish
+			setContactData(getDefaultContactData())
+		} finally {
+			setLoadingContact(false)
+		}
+	}
+
+	// Standart kontakt ma'lumotlari (API ishlamasa foydalanish uchun)
+	const getDefaultContactData = () => ({
+		address_uz: "Samarqand shahar, Gagarin ko'chasi, 70-uy",
+		address_ru: "г. Самарканд, ул. Гагарина, дом 70",
+		address_en: "Samarkand city, Gagarin street, house 70",
+		workin_uz: "Dushanba - Juma: 9:00 - 18:00",
+		workin_ru: "Понедельник - Пятница: 9:00 - 18:00",
+		workin_en: "Monday - Friday: 9:00 - 18:00",
+		phone: "+998 (78) 210-08-93",
+		phone_faks: "+998 (78) 210-08-93",
+		email: "zar.havza@minwater.uz"
+	})
+
+	// Tilga mos manzilni olish
+	const getAddressByLanguage = () => {
+		if (!contactData) return ""
+
+		switch (language) {
+			case 'uz':
+				return contactData.address_uz || contactData.address_ru || contactData.address_en || ""
+			case 'ru':
+				return contactData.address_ru || contactData.address_uz || contactData.address_en || ""
+			case 'en':
+				return contactData.address_en || contactData.address_uz || contactData.address_ru || ""
+			default:
+				return contactData.address_uz || ""
+		}
+	}
+
+	// Tilga mos ish vaqtini olish
+	const getWorkinByLanguage = () => {
+		if (!contactData) return ""
+
+		switch (language) {
+			case 'uz':
+				return contactData.workin_uz || contactData.workin_ru || contactData.workin_en || ""
+			case 'ru':
+				return contactData.workin_ru || contactData.workin_uz || contactData.workin_en || ""
+			case 'en':
+				return contactData.workin_en || contactData.workin_uz || contactData.workin_ru || ""
+			default:
+				return contactData.workin_uz || ""
+		}
+	}
+
+	// Telefon raqamlarini massivga aylantirish
+	const getPhonesArray = () => {
+		if (!contactData) return []
+
+		const phones = []
+		if (contactData.phone) phones.push(contactData.phone)
+		if (contactData.phone_faks && contactData.phone_faks !== contactData.phone) {
+			phones.push(contactData.phone_faks)
+		}
+		return phones
+	}
+
+	// Email larni massivga aylantirish
+	const getEmailsArray = () => {
+		if (!contactData) return []
+		return contactData.email ? [contactData.email] : []
+	}
+
+	// Ish vaqtini massivga aylantirish
+	const getWorkSchedule = () => {
+		if (!contactData) return []
+		const workin = getWorkinByLanguage()
+		return workin ? [workin] : []
+	}
 
 	const fetchLocations = async () => {
 		try {
 			setLoadingLocations(true)
+			console.log("🔄 Fetching locations for language:", language)
 			const response = await axios.get(`${BASE_URL}/api/location/getAll/${language}`)
 
 			if (response.data.success) {
+				console.log("✅ Locations data received:", response.data.locations)
 				const apiLocations = response.data.locations.map(location => ({
 					...location,
 					coord: location.coord.split(',').map(coord => parseFloat(coord.trim()))
@@ -67,20 +194,66 @@ const Contacts = () => {
 		{
 			_id: "1",
 			coord: [39.6559199, 66.9626416],
-			title: "Bosh ofis",
-			address: "Samarqand shahri, Markaziy ko'cha",
+			title: getLocationTitle("Bosh ofis", "Главный офис", "Head Office"),
+			address: getLocationAddress(
+				"Samarqand shahri, Markaziy ko'cha",
+				"г. Самарканд, Центральная улица",
+				"Samarkand city, Central street"
+			),
 			phone: "+998 90 123 45 67",
-			workHours: "Dushanba-Juma: 9:00-18:00"
+			workHours: getLocationWorkHours(
+				"Dushanba-Juma: 9:00-18:00",
+				"Понедельник-Пятница: 9:00-18:00",
+				"Monday-Friday: 9:00-18:00"
+			)
 		},
 		{
 			_id: "2",
 			coord: [39.654500, 66.975000],
-			title: "Gagarin filiali",
-			address: "Samarqand, Registon maydoni",
+			title: getLocationTitle("Gagarin filiali", "Филиал Гагарина", "Gagarin Branch"),
+			address: getLocationAddress(
+				"Samarqand, Registon maydoni",
+				"Самарканд, площадь Регистан",
+				"Samarkand, Registan square"
+			),
 			phone: "+998 91 234 56 78",
-			workHours: "Dushanba-Shanba: 10:00-20:00"
+			workHours: getLocationWorkHours(
+				"Dushanba-Shanba: 10:00-20:00",
+				"Понедельник-Суббота: 10:00-20:00",
+				"Monday-Saturday: 10:00-20:00"
+			)
 		}
 	]
+
+	// Tilga mos sarlavha olish
+	const getLocationTitle = (uz, ru, en) => {
+		switch (language) {
+			case 'uz': return uz
+			case 'ru': return ru
+			case 'en': return en
+			default: return uz
+		}
+	}
+
+	// Tilga mos manzil olish
+	const getLocationAddress = (uz, ru, en) => {
+		switch (language) {
+			case 'uz': return uz
+			case 'ru': return ru
+			case 'en': return en
+			default: return uz
+		}
+	}
+
+	// Tilga mos ish vaqti olish
+	const getLocationWorkHours = (uz, ru, en) => {
+		switch (language) {
+			case 'uz': return uz
+			case 'ru': return ru
+			case 'en': return en
+			default: return uz
+		}
+	}
 
 	// Tarjima matnlari
 	const translations = {
@@ -105,10 +278,13 @@ const Contacts = () => {
 			successMessage: "Arizangiz muvaffaqiyatli yuborildi!",
 			errorMessage: "Xatolik yuz berdi. Iltimos, qaytadan urinib ko'ring.",
 			loadingLocations: "Lokatsiyalar yuklanmoqda...",
+			loadingContact: "Aloqa ma'lumotlari yuklanmoqda...",
 			noLocations: "Lokatsiyalar mavjud emas",
 			balloonAddress: "Manzil",
 			balloonPhone: "Telefon",
-			balloonWorkHours: "Ish vaqti"
+			balloonWorkHours: "Ish vaqti",
+			fax: "Faks",
+			officesCount: "ta ofis"
 		},
 		ru: {
 			title: "Свяжитесь с нами",
@@ -131,10 +307,13 @@ const Contacts = () => {
 			successMessage: "Ваша заявка успешно отправлена!",
 			errorMessage: "Произошла ошибка. Пожалуйста, попробуйте еще раз.",
 			loadingLocations: "Загрузка локаций...",
+			loadingContact: "Загрузка контактных данных...",
 			noLocations: "Локации не найдены",
 			balloonAddress: "Адрес",
 			balloonPhone: "Телефон",
-			balloonWorkHours: "Время работы"
+			balloonWorkHours: "Время работы",
+			fax: "Факс",
+			officesCount: "офисов"
 		},
 		en: {
 			title: "Contact Us",
@@ -157,36 +336,17 @@ const Contacts = () => {
 			successMessage: "Your application has been sent successfully!",
 			errorMessage: "An error occurred. Please try again.",
 			loadingLocations: "Loading locations...",
+			loadingContact: "Loading contact information...",
 			noLocations: "No locations found",
 			balloonAddress: "Address",
 			balloonPhone: "Phone",
-			balloonWorkHours: "Working Hours"
+			balloonWorkHours: "Working Hours",
+			fax: "Fax",
+			officesCount: "offices"
 		}
 	}
 
 	const t = translations[language] || translations.uz
-
-	// Statik ma'lumotlar
-	const contactDetails = {
-		address: language === 'uz' ? "Urganch shahri, Al-Xorazmiy ko'chasi 15" :
-			language === 'ru' ? "г. Ургенч, ул. Аль-Хорезми 15" :
-				"Urgench city, Al-Khorezmi street 15",
-		phones: ["+998 (71) 200-00-00", "+998 (71) 200-00-01"],
-		emails: ["info@ufez.uz", "invest@ufez.uz"],
-		workSchedule: language === 'uz' ? [
-			"Dushanba - Juma: 9:00 - 18:00",
-			"Shanba: 9:00 - 14:00",
-			"Yakshanba: Dam olish kuni"
-		] : language === 'ru' ? [
-			"Понедельник - Пятница: 9:00 - 18:00",
-			"Суббота: 9:00 - 14:00",
-			"Воскресенье: Выходной"
-		] : [
-			"Monday - Friday: 9:00 - 18:00",
-			"Saturday: 9:00 - 14:00",
-			"Sunday: Day off"
-		]
-	}
 
 	const handleChange = (e) => {
 		setFormData({
@@ -281,7 +441,7 @@ const Contacts = () => {
 				<!-- Footer -->
 				<div style="margin-top: 16px; padding-top: 12px; border-top: 1px solid #e5e7eb; text-align: center;">
 					<small style="color: #6b7280; font-size: 12px;">
-						📍 Marker ustiga bosing
+						📍 ${language === 'uz' ? 'Marker ustiga bosing' : language === 'ru' ? 'Нажмите на маркер' : 'Click on the marker'}
 					</small>
 				</div>
 			</div>
@@ -315,7 +475,7 @@ const Contacts = () => {
 				<!-- Ko'rsatma -->
 				<div style="margin-top: 8px; padding-top: 6px; border-top: 1px dashed #d1d5db;">
 					<small style="color: #9ca3af; font-size: 10px;">
-						Batafsil ma'lumot uchun bosing
+						${language === 'uz' ? 'Batafsil ma\'lumot uchun bosing' : language === 'ru' ? 'Нажмите для подробной информации' : 'Click for more information'}
 					</small>
 				</div>
 			</div>
@@ -334,6 +494,20 @@ const Contacts = () => {
 			</div>
 		</div>
 	)
+
+	// Yuklanish holatini ko'rsatish
+	if (loadingContact) {
+		return (
+			<section id="contacts" className="py-16 bg-white">
+				<div className="container mx-auto px-4 sm:px-6 lg:px-8">
+					<div className="text-center">
+						<div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500 mx-auto mb-4"></div>
+						<p className="text-gray-600">{t.loadingContact}</p>
+					</div>
+				</div>
+			</section>
+		)
+	}
 
 	return (
 		<section id="contacts" className="py-16 bg-white">
@@ -356,24 +530,34 @@ const Contacts = () => {
 							</h3>
 
 							<div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+								{/* Manzil */}
 								<ContactItem icon={MapPin} color="bg-blue-500" title={t.address}>
-									<p className="text-gray-600 text-sm">{contactDetails.address}</p>
+									<p className="text-gray-600 text-sm">{getAddressByLanguage()}</p>
 								</ContactItem>
 
+								{/* Telefon */}
 								<ContactItem icon={Phone} color="bg-green-500" title={t.phone}>
-									{contactDetails.phones.map((number, index) => (
+									{getPhonesArray().map((number, index) => (
 										<p key={index} className="text-gray-600 text-sm">{number}</p>
 									))}
+									{contactData?.phone_faks && contactData.phone_faks !== contactData.phone && (
+										<div className="mt-1">
+											<span className="text-xs text-gray-500 font-medium">{t.fax}: </span>
+											<span className="text-gray-600 text-sm">{contactData.phone_faks}</span>
+										</div>
+									)}
 								</ContactItem>
 
+								{/* Email */}
 								<ContactItem icon={Mail} color="bg-purple-500" title={t.email}>
-									{contactDetails.emails.map((email, index) => (
+									{getEmailsArray().map((email, index) => (
 										<p key={index} className="text-gray-600 text-sm">{email}</p>
 									))}
 								</ContactItem>
 
+								{/* Ish vaqti */}
 								<ContactItem icon={Clock} color="bg-orange-500" title={t.workTime}>
-									{contactDetails.workSchedule.map((schedule, index) => (
+									{getWorkSchedule().map((schedule, index) => (
 										<p key={index} className="text-gray-600 text-sm">{schedule}</p>
 									))}
 								</ContactItem>
@@ -387,7 +571,7 @@ const Contacts = () => {
 										{t.location}
 									</h4>
 									<span className="text-xs text-gray-500 bg-white px-2 py-1 rounded-full border">
-										{locations.length} ta ofis
+										{locations.length} {t.officesCount}
 									</span>
 								</div>
 
@@ -411,7 +595,7 @@ const Contacts = () => {
 										<YMaps
 											query={{
 												apikey: "41da0c7e-9daf-46c6-bb79-3519885b11bf",
-												lang: 'ru_RU'
+												lang: language === 'ru' ? 'ru_RU' : language === 'en' ? 'en_US' : 'uz_UZ'
 											}}
 										>
 											<Map

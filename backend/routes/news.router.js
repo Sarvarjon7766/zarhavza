@@ -1,10 +1,10 @@
 const express = require('express')
 const router = express.Router()
-const uploadPhotos = require('../middlewares/uploadPhotos')
+const fullUpload = require('../middlewares/fullUpload.middleware')
 const NewsController = require('../controllers/news.controller')
 
-router.post('/create', uploadPhotos, NewsController.create)
-router.put('/update/:id', uploadPhotos, NewsController.update)
+router.post('/create', fullUpload, NewsController.create)
+router.put('/update/:id', fullUpload, NewsController.update)
 router.delete('/delete/:id', NewsController.deleted)
 router.get('/getAll/:lang', NewsController.getAll)
 router.get('/getOne/:lang', NewsController.getOne)

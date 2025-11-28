@@ -11,5 +11,12 @@ const opendatarouter = require('./opendata.router')
 const activityrouter = require('./activity.router')
 const announcementrouter = require('./announcement.router')
 const gallaryrouter = require('./gallary.router')
+const pagesrouter = require('./pages.router')
+const generalaboutrouter = require('./general.about.router')
+const generalannouncementrouter = require('./general.announcement.router')
+const generalgalleryrouter = require('./general.gallery.router')
+const generalnewsrouter = require('./general.news.router')
+const socialnetworkrouter = require('./social.network.router')
+const contactrouter = require('./contact.router')
 
-module.exports = { bannerrouter, newsrouter, askedrouter, applicationrouter, userrouter, programrouter, technologiesrouter, locationrouter, aboutrouter, opendatarouter, activityrouter, announcementrouter, gallaryrouter }
+module.exports = { bannerrouter, newsrouter, askedrouter, applicationrouter, userrouter, programrouter, technologiesrouter, locationrouter, aboutrouter, opendatarouter, activityrouter, announcementrouter, gallaryrouter, pagesrouter, generalaboutrouter, generalannouncementrouter, generalgalleryrouter, generalnewsrouter, socialnetworkrouter, contactrouter }

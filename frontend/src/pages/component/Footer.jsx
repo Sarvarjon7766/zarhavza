@@ -1,8 +1,13 @@
+import axios from 'axios'
 import { Heart, Mail, MapPin, Phone } from "lucide-react"
 import { useEffect, useState } from "react"
 
 const Footer = () => {
 	const [language, setLanguage] = useState("uz")
+	const [contactData, setContactData] = useState(null)
+	const [loading, setLoading] = useState(true)
+
+	const BASE_URL = import.meta.env.VITE_BASE_URL
 
 	// LocalStorage'dan tilni o'qish
 	useEffect(() => {
@@ -32,6 +37,55 @@ const Footer = () => {
 		}
 	}, [language])
 
+	// API dan kontakt ma'lumotlarini olish
+	useEffect(() => {
+		fetchContactData()
+	}, [language])
+
+	// Kontakt ma'lumotlarini olish
+	const fetchContactData = async () => {
+		try {
+			setLoading(true)
+			const response = await axios.get(`${BASE_URL}/api/contact/getActive/${language}`)
+
+			if (response.data.success) {
+				setContactData(response.data.contact)
+			} else {
+				console.error("Kontakt ma'lumotlarini olishda xatolik:", response.data.message)
+				// Agar API'dan ma'lumot olinmasa, standart ma'lumotlarni ko'rsatish
+				setContactData(getDefaultContactData())
+			}
+		} catch (error) {
+			console.error("Kontakt ma'lumotlarini yuklashda xatolik:", error)
+			// Xatolik yuz bersa, standart ma'lumotlarni ko'rsatish
+			setContactData(getDefaultContactData())
+		} finally {
+			setLoading(false)
+		}
+	}
+
+	// Standart kontakt ma'lumotlari (API ishlamasa foydalanish uchun)
+	const getDefaultContactData = () => ({
+		address: language === 'uz' ? "Samarqand shahar, Gagarin ko'chasi, 70-uy" :
+			language === 'ru' ? "г. Самарканд, ул. Гагарина, дом 70" :
+				"Samarkand city, Gagarin street, house 70",
+		phone: "+998 (78) 210-08-93",
+		phone_faks: "+998 (78) 210-08-93",
+		email: "zar.havza@minwater.uz"
+	})
+
+	// Telefon raqamlarini olish
+	const getPhoneNumbers = () => {
+		if (!contactData) return []
+
+		const phones = []
+		if (contactData.phone) phones.push(contactData.phone)
+		if (contactData.phone_faks && contactData.phone_faks !== contactData.phone) {
+			phones.push(contactData.phone_faks)
+		}
+		return phones
+	}
+
 	// Tarjima matnlari - Zarafshon irrigatsiya tizimlari boshqarmasi uchun
 	const translations = {
 		uz: {
@@ -42,10 +96,12 @@ const Footer = () => {
 			trustPhone: "Ishonch telefoni",
 			email: "Elektron manzil",
 			address: "Bosh ofis",
-			location: "Samarqand viloyati, O'zbekiston",
+			location: "Samarqand shahar, Gagarin ko'chasi, 70-uy",
 			projectBy: "Loyiha",
 			developedBy: "tomonidan ishlab chiqilgan",
-			allRights: "Barcha huquqlar himoyalangan"
+			allRights: "Barcha huquqlar himoyalangan",
+			phone: "Telefon",
+			fax: "Faks"
 		},
 		ru: {
 			organizationName: '"Управление Заравшанских ирригационных систем"',
@@ -55,10 +111,12 @@ const Footer = () => {
 			trustPhone: "Телефон доверия",
 			email: "Электронная почта",
 			address: "Главный офис",
-			location: "Самаркандская область, Узбекистан",
+			location: "г. Самарканд, ул. Гагарина, дом 70",
 			projectBy: "Проект",
 			developedBy: "разработан",
-			allRights: "Все права защищены"
+			allRights: "Все права защищены",
+			phone: "Телефон",
+			fax: "Факс"
 		},
 		en: {
 			organizationName: '"Zarafshon Irrigation Systems Administration"',
@@ -68,14 +126,30 @@ const Footer = () => {
 			trustPhone: "Trust Phone",
 			email: "Email",
 			address: "Head Office",
-			location: "Samarkand Region, Uzbekistan",
+			location: "Samarkand city, Gagarin street, house 70",
 			projectBy: "Project",
 			developedBy: "developed by",
-			allRights: "All rights reserved"
+			allRights: "All rights reserved",
+			phone: "Phone",
+			fax: "Fax"
 		}
 	}
 
 	const t = translations[language] || translations.uz
+
+	// Yuklanish holatida ko'rsatish
+	if (loading) {
+		return (
+			<footer className="bg-gradient-to-r from-blue-900 to-blue-800 text-white">
+				<div className="container mx-auto px-4 sm:px-6 lg:px-8 py-12">
+					<div className="flex justify-center items-center">
+						<div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-white"></div>
+						<span className="ml-3 text-blue-200">Ma'lumotlar yuklanmoqda...</span>
+					</div>
+				</div>
+			</footer>
+		)
+	}
 
 	return (
 		<footer className="bg-gradient-to-r from-blue-900 to-blue-800 text-white">
@@ -114,26 +188,34 @@ const Footer = () => {
 						</h4>
 
 						{/* Telefon */}
-						<div className="flex items-center gap-3 text-blue-100 hover:text-white transition-colors">
-							<div className="w-10 h-10 bg-blue-700 rounded-full flex items-center justify-center">
-								<Phone size={18} />
-							</div>
-							<div>
-								<p className="font-medium">+998 (66) 123-45-67</p>
-								<p className="text-sm text-blue-200">{t.trustPhone}</p>
-							</div>
+						<div className="space-y-3">
+							{getPhoneNumbers().map((phone, index) => (
+								<div key={index} className="flex items-center gap-3 text-blue-100 hover:text-white transition-colors">
+									<div className="w-10 h-10 bg-blue-700 rounded-full flex items-center justify-center">
+										<Phone size={18} />
+									</div>
+									<div>
+										<p className="font-medium">{phone}</p>
+										<p className="text-sm text-blue-200">
+											{index === 0 ? t.trustPhone : t.fax}
+										</p>
+									</div>
+								</div>
+							))}
 						</div>
 
 						{/* Email */}
-						<div className="flex items-center gap-3 text-blue-100 hover:text-white transition-colors">
-							<div className="w-10 h-10 bg-blue-700 rounded-full flex items-center justify-center">
-								<Mail size={18} />
+						{contactData?.email && (
+							<div className="flex items-center gap-3 text-blue-100 hover:text-white transition-colors">
+								<div className="w-10 h-10 bg-blue-700 rounded-full flex items-center justify-center">
+									<Mail size={18} />
+								</div>
+								<div>
+									<p className="font-medium">{contactData.email}</p>
+									<p className="text-sm text-blue-200">{t.email}</p>
+								</div>
 							</div>
-							<div>
-								<p className="font-medium">info@zarafshon-irrigation.uz</p>
-								<p className="text-sm text-blue-200">{t.email}</p>
-							</div>
-						</div>
+						)}
 
 						{/* Manzil */}
 						<div className="flex items-start gap-3 text-blue-100 hover:text-white transition-colors">
@@ -142,7 +224,9 @@ const Footer = () => {
 							</div>
 							<div>
 								<p className="font-medium">{t.address}</p>
-								<p className="text-sm text-blue-200">{t.location}</p>
+								<p className="text-sm text-blue-200">
+									{contactData?.address || t.location}
+								</p>
 							</div>
 						</div>
 					</div>
