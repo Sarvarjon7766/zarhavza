@@ -18,5 +18,9 @@ const generalgalleryrouter = require('./general.gallery.router')
 const generalnewsrouter = require('./general.news.router')
 const socialnetworkrouter = require('./social.network.router')
 const contactrouter = require('./contact.router')
+const nodemailerrouter = require('./nodemailer.router')
+const generalleaderrouter = require('./general.leader.router')
+const generalcommunicationrouter = require('./general.communication.router')
+const fileUpload = require('./fileupload.router')
 
-module.exports = { bannerrouter, newsrouter, askedrouter, applicationrouter, userrouter, programrouter, technologiesrouter, locationrouter, aboutrouter, opendatarouter, activityrouter, announcementrouter, gallaryrouter, pagesrouter, generalaboutrouter, generalannouncementrouter, generalgalleryrouter, generalnewsrouter, socialnetworkrouter, contactrouter }
+module.exports = { bannerrouter, newsrouter, askedrouter, applicationrouter, userrouter, programrouter, technologiesrouter, locationrouter, aboutrouter, opendatarouter, activityrouter, announcementrouter, gallaryrouter, pagesrouter, generalaboutrouter, generalannouncementrouter, generalgalleryrouter, generalnewsrouter, socialnetworkrouter, contactrouter, nodemailerrouter, generalleaderrouter, generalcommunicationrouter, fileUpload }

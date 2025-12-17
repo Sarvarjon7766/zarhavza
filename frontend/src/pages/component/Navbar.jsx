@@ -17,6 +17,14 @@ const Navbar = () => {
 
 	const BASE_URL = import.meta.env.VITE_BASE_URL
 
+	// Navigatsiyalar soni va o'lcham sozlamalari
+	const [navConfig, setNavConfig] = useState({
+		gap: 'space-x-4',
+		textSize: 'text-base',
+		paddingX: 'px-5',
+		menuMaxWidth: 'w-64'
+	})
+
 	// LocalStorage'dan tilni o'qish
 	useEffect(() => {
 		const savedLang = localStorage.getItem("lang") || "uz"
@@ -27,12 +35,11 @@ const Navbar = () => {
 	useEffect(() => {
 		const fetchMenu = async () => {
 			try {
-				console.log("🔄 Fetching menu for language:", language)
 				const { data } = await axios.get(`${BASE_URL}/api/pages/getAll/${language}`)
-				console.log("📋 Menu data received:", data)
-
 				if (data.success) {
 					setMenuItems(data.data)
+					// Navigatsiyalar soniga qarab sozlamalarni avtomatik o'zgartirish
+					updateNavConfig(data.data.length)
 				}
 			} catch (error) {
 				console.log("❌ Menu fetch error:", error)
@@ -41,6 +48,32 @@ const Navbar = () => {
 
 		fetchMenu()
 	}, [BASE_URL, language])
+
+	// Navigatsiyalar soniga qarab konfiguratsiyani yangilash
+	const updateNavConfig = (menuCount) => {
+		if (menuCount > 7) {
+			setNavConfig({
+				gap: 'space-x-2',
+				textSize: 'text-sm',
+				paddingX: 'px-3',
+				menuMaxWidth: 'w-56'
+			})
+		} else if (menuCount > 5) {
+			setNavConfig({
+				gap: 'space-x-3',
+				textSize: 'text-sm',
+				paddingX: 'px-4',
+				menuMaxWidth: 'w-60'
+			})
+		} else {
+			setNavConfig({
+				gap: 'space-x-4',
+				textSize: 'text-base',
+				paddingX: 'px-5',
+				menuMaxWidth: 'w-64'
+			})
+		}
+	}
 
 	// LocalStorage'dan accessibility sozlamalarini o'qish
 	useEffect(() => {
@@ -58,49 +91,11 @@ const Navbar = () => {
 		root.style.fontSize = `${settings.fontSize}%`
 
 		if (settings.theme === 'grayscale') {
-			root.style.setProperty('--bg-color', '#ffffff')
-			root.style.setProperty('--text-color', '#000000')
-			root.style.setProperty('--primary-color', '#666666')
-			root.style.setProperty('--secondary-color', '#333333')
 			root.style.filter = 'grayscale(100%)'
 		} else {
-			root.style.setProperty('--bg-color', '')
-			root.style.setProperty('--text-color', '')
-			root.style.setProperty('--primary-color', '')
-			root.style.setProperty('--secondary-color', '')
 			root.style.filter = 'none'
 		}
 	}
-
-	// Scroll ni boshqarish
-	const toggleBodyScroll = (disable) => {
-		if (disable) {
-			document.body.style.overflow = 'hidden'
-		} else {
-			document.body.style.overflow = 'auto'
-		}
-	}
-
-	// Til o'zgarganda yangilash
-	useEffect(() => {
-		const handleStorageChange = () => {
-			const savedLang = localStorage.getItem("lang") || "uz"
-			setLanguage(savedLang)
-		}
-
-		window.addEventListener('storage', handleStorageChange)
-		const interval = setInterval(() => {
-			const savedLang = localStorage.getItem("lang") || "uz"
-			if (savedLang !== language) {
-				setLanguage(savedLang)
-			}
-		}, 1000)
-
-		return () => {
-			window.removeEventListener('storage', handleStorageChange)
-			clearInterval(interval)
-		}
-	}, [language])
 
 	// Tilni o'zgartirish
 	const handleLanguageChange = (langCode) => {
@@ -111,7 +106,6 @@ const Navbar = () => {
 
 	// Navigate funksiyasi
 	const handleNavigate = (slug) => {
-		console.log("📍 Navigate to slug:", slug)
 		navigate(slug)
 		setMobileOpen(false)
 		setOpenMenu(null)
@@ -129,13 +123,13 @@ const Navbar = () => {
 	// Maxsus Imkoniyatlar modalini ochish
 	const handleAccessibilityClick = () => {
 		setShowAccessibilityModal(true)
-		toggleBodyScroll(true)
+		document.body.style.overflow = 'hidden'
 	}
 
 	// Modalni yopish
 	const handleCloseModal = () => {
 		setShowAccessibilityModal(false)
-		toggleBodyScroll(false)
+		document.body.style.overflow = 'auto'
 	}
 
 	// Shrift o'lchamini o'zgartirish
@@ -165,7 +159,7 @@ const Navbar = () => {
 		applyAccessibilitySettings(defaultSettings)
 	}
 
-	// Menu itemlar uchun hover va click handlerlar
+	// Menu itemlar uchun hover handlerlar
 	const handleMouseEnter = (id) => setOpenMenu(id)
 	const handleMouseLeave = () => setOpenMenu(null)
 
@@ -179,7 +173,7 @@ const Navbar = () => {
 			home: "Bosh sahifa",
 			contact: "Bog'lanish",
 			samarkandRegion: "Samarqand viloyati",
-			zarafshonIrrigation: '"Zarafshon" irrigatsiya tizimi boshqarmasi',
+			zarafshonIrrigation: 'Zarafshon irrigatsiya tizimlari havza boshqarmasi',
 			accessibility: "Maxsus Imkoniyatlar",
 			fontSize: "Shrift o'lchami",
 			theme: "Mavzu",
@@ -188,15 +182,13 @@ const Navbar = () => {
 			reset: "Barchasini tiklash",
 			close: "Yopish",
 			accessibilitySettings: "Qulaylik sozlamalari",
-			customizeSite: "Saytni o'zingizga qulay tarzda sozlang",
-			current: "Joriy",
-			percent: "%"
+			customizeSite: "Saytni o'zingizga qulay tarzda sozlang"
 		},
 		ru: {
 			home: "Главная",
 			contact: "Связь",
 			samarkandRegion: "Самаркандская область",
-			zarafshonIrrigation: 'Управление ирригационной системы "Зарафшан"',
+			zarafshonIrrigation: 'Зарафшанское управление бассейна ирригационных систем',
 			accessibility: "Специальные Возможности",
 			fontSize: "Размер шрифта",
 			theme: "Тема",
@@ -205,15 +197,13 @@ const Navbar = () => {
 			reset: "Сбросить все",
 			close: "Закрыть",
 			accessibilitySettings: "Настройки доступности",
-			customizeSite: "Настройте сайт под себя",
-			current: "Текущий",
-			percent: "%"
+			customizeSite: "Настройте сайт под себя"
 		},
 		en: {
 			home: "Home",
 			contact: "Contact",
 			samarkandRegion: "Samarkand region",
-			zarafshonIrrigation: '"Zarafshon" Irrigation System Administration',
+			zarafshonIrrigation: 'Zarafshan Basin Irrigation Systems Authority',
 			accessibility: "Special Features",
 			fontSize: "Font Size",
 			theme: "Theme",
@@ -222,9 +212,7 @@ const Navbar = () => {
 			reset: "Reset All",
 			close: "Close",
 			accessibilitySettings: "Accessibility Settings",
-			customizeSite: "Customize the site to your preferences",
-			current: "Current",
-			percent: "%"
+			customizeSite: "Customize the site to your preferences"
 		}
 	}
 
@@ -232,13 +220,13 @@ const Navbar = () => {
 
 	// Menu itemlarni render qilish (Desktop)
 	const renderDesktopMenu = () => (
-		<ul className="flex items-center space-x-1 font-semibold text-sm">
-			{/* Bosh sahifa - har doim birinchi */}
+		<ul className={`flex items-center justify-center ${navConfig.gap} font-medium`}>
+			{/* Bosh sahifa */}
 			<li
 				onClick={() => handleNavigate("/")}
-				className="text-white hover:text-yellow-300 hover:bg-blue-700/50 py-3 lg:py-4 px-2 md:px-3 lg:px-4 xl:px-6 cursor-pointer rounded-lg transition-all duration-300 group whitespace-nowrap"
+				className={`text-white hover:text-yellow-300 hover:bg-blue-700/50 transition-all duration-300 py-3 ${navConfig.paddingX} cursor-pointer rounded-lg group`}
 			>
-				<span className="group-hover:scale-105 transition-transform text-xs md:text-sm lg:text-base xl:text-lg">
+				<span className={`${navConfig.textSize} font-semibold group-hover:scale-105 transition-transform`}>
 					{t.home}
 				</span>
 			</li>
@@ -253,39 +241,34 @@ const Navbar = () => {
 				>
 					<button
 						onClick={() => {
-							console.log("🖱️ Clicked menu item:", item.title, "slug:", item.slug)
 							if (item.children.length === 0) {
 								handleNavigate(item.slug)
 							}
 						}}
-						className="flex items-center gap-1 lg:gap-2 text-white hover:text-yellow-300 hover:bg-blue-700/50 py-3 lg:py-4 px-2 md:px-3 lg:px-4 xl:px-6 cursor-pointer rounded-lg transition-all duration-300 group whitespace-nowrap"
+						className={`flex items-center gap-1 text-white hover:text-yellow-300 hover:bg-blue-700/50 py-3 ${navConfig.paddingX} cursor-pointer rounded-lg transition-all duration-300 whitespace-nowrap group`}
 					>
-						<span className="group-hover:scale-105 transition-transform text-xs md:text-sm lg:text-base xl:text-lg">
+						<span className={`${navConfig.textSize} font-semibold group-hover:scale-105 transition-transform`}>
 							{item.title}
 						</span>
 						{item.children.length > 0 && (
 							<ChevronDown
-								size={14}
-								className={`transition-transform duration-300 ${openMenu === item._id ? "rotate-180 text-yellow-300" : "group-hover:scale-110"} w-3 h-3 md:w-4 md:h-4 lg:w-4 lg:h-4`}
+								size={menuItems.length > 7 ? 14 : 16}
+								className={`transition-transform duration-300 ${openMenu === item._id ? "rotate-180 text-yellow-300" : "group-hover:text-yellow-300"}`}
 							/>
 						)}
 					</button>
 
 					{/* Dropdown menu */}
 					{item.children.length > 0 && openMenu === item._id && (
-						<div className="absolute left-0 top-full bg-white border border-gray-300 rounded-xl w-44 md:w-48 lg:w-52 xl:w-56 z-50 overflow-hidden shadow-md">
-							<ul className="p-2 space-y-1">
+						<div className={`absolute left-1/2 transform -translate-x-1/2 top-full bg-white ${navConfig.menuMaxWidth} z-50 overflow-hidden mt-1 border border-gray-200 shadow-lg`}>
+							<ul className="py-2">
 								{item.children.map((child) => (
 									<li
 										key={child._id}
-										onClick={() => {
-											console.log("🖱️ Clicked child menu:", child.title, "slug:", child.slug)
-											handleNavigate(child.slug)
-										}}
-										className="flex items-center space-x-2 lg:space-x-3 hover:bg-gray-200 rounded-lg px-2 lg:px-3 py-2 lg:py-3 text-black cursor-pointer transition-all duration-200 group"
+										onClick={() => handleNavigate(child.slug)}
+										className="hover:bg-blue-50 px-4 py-3 text-gray-800 cursor-pointer transition-all duration-200 group"
 									>
-										{child.icon && <span className="text-base lg:text-lg">{child.icon}</span>}
-										<span className="font-medium group-hover:text-blue-600 group-hover:translate-x-1 transition-transform text-xs md:text-sm lg:text-base">
+										<span className={`${menuItems.length > 7 ? 'text-sm' : 'text-base'} font-medium group-hover:text-blue-600 group-hover:translate-x-1 transition-transform inline-block`}>
 											{child.title}
 										</span>
 									</li>
@@ -296,181 +279,208 @@ const Navbar = () => {
 				</li>
 			))}
 
-			{/* Bog'lanish - har doim oxirgi */}
+			{/* Bog'lanish */}
 			<li
 				onClick={() => handleNavigate("/contact")}
-				className="text-white hover:text-yellow-300 hover:bg-blue-700/50 py-3 lg:py-4 px-2 md:px-3 lg:px-4 xl:px-6 cursor-pointer rounded-lg transition-all duration-300 group whitespace-nowrap"
+				className={`text-white hover:text-yellow-300 hover:bg-blue-700/50 transition-all duration-300 py-3 ${navConfig.paddingX} cursor-pointer rounded-lg group`}
 			>
-				<span className="group-hover:scale-105 transition-transform text-xs md:text-sm lg:text-base xl:text-lg">
+				<span className={`${navConfig.textSize} font-semibold group-hover:scale-105 transition-transform`}>
 					{t.contact}
 				</span>
 			</li>
 		</ul>
 	)
 
-	// Menu itemlarni render qilish (Mobile)
+	// Menu itemlarni render qilish (Mobile) - TO'LIQ TUZATILGAN VERSIYA
 	const renderMobileMenu = () => (
-		<div className="py-3 space-y-1">
-			{/* Bosh sahifa - har doim birinchi */}
+		<div className="bg-blue-600">
+			{/* Bosh sahifa - button emas, div */}
 			<div
 				onClick={() => handleNavigate("/")}
-				className="py-2 px-3 text-white hover:text-yellow-300 hover:bg-blue-700 rounded-lg cursor-pointer transition-all duration-200"
+				className="w-full py-4 px-5 text-white hover:text-yellow-300 hover:bg-blue-700/50 cursor-pointer transition-all duration-200 active:bg-blue-700/70 border-b border-blue-500/40"
 			>
-				<span className="font-medium text-sm">{t.home}</span>
+				<div className="flex items-center">
+					<span className={`${menuItems.length > 7 ? 'text-sm' : 'text-base'} font-semibold`}>
+						{t.home}
+					</span>
+				</div>
 			</div>
 
 			{/* API dan kelgan menyu itemlari */}
 			{menuItems.map((item) => (
-				<div key={item._id}>
+				<div key={item._id} className="border-b border-blue-500/40 last:border-b-0">
 					{item.children.length === 0 ? (
+						// Oddiy menyu elementi - div element
 						<div
-							onClick={() => {
-								console.log("📱 Clicked mobile menu:", item.title, "slug:", item.slug)
-								handleNavigate(item.slug)
-							}}
-							className="py-2 px-3 text-white hover:text-yellow-300 hover:bg-blue-700 rounded-lg cursor-pointer transition-all duration-200"
+							onClick={() => handleNavigate(item.slug)}
+							className="w-full py-4 px-5 text-white hover:text-yellow-300 hover:bg-blue-700/50 cursor-pointer transition-all duration-200 active:bg-blue-700/70"
 						>
-							<span className="font-medium text-sm">{item.title}</span>
+							<div className="flex items-center">
+								<span className={`${menuItems.length > 7 ? 'text-sm' : 'text-base'} font-semibold`}>
+									{item.title}
+								</span>
+							</div>
 						</div>
 					) : (
-						<div>
-							<button
+						// Dropdown menyu elementi
+						<div className="w-full">
+							{/* Asosiy menyu elementi - div element */}
+							<div
 								onClick={() => toggleMenu(`mobile-${item._id}`)}
-								className="flex justify-between items-center w-full py-2 px-3 text-white hover:text-yellow-300 hover:bg-blue-700 rounded-lg transition-all duration-200"
+								className="w-full py-4 px-5 text-white hover:text-yellow-300 hover:bg-blue-700/50 cursor-pointer transition-all duration-200 active:bg-blue-700/70"
 							>
-								<span className="font-medium text-sm">{item.title}</span>
-								<ChevronDown
-									size={16}
-									className={`transition-transform duration-300 ${openMenu === `mobile-${item._id}` ? "rotate-180 text-yellow-300" : ""
-										}`}
-								/>
-							</button>
+								<div className="flex items-center justify-between">
+									<span className={`${menuItems.length > 7 ? 'text-sm' : 'text-base'} font-semibold`}>
+										{item.title}
+									</span>
+									<ChevronDown
+										size={menuItems.length > 7 ? 16 : 18}
+										className={`transition-transform duration-300 ${openMenu === `mobile-${item._id}` ? "rotate-180 text-yellow-300" : ""}`}
+									/>
+								</div>
+							</div>
+
+							{/* Submenu - ochilganda ko'rinadi */}
 							{openMenu === `mobile-${item._id}` && (
-								<ul className="pl-4 py-2 space-y-1">
+								<div className="bg-blue-700/40 backdrop-blur-sm">
 									{item.children.map((child) => (
-										<li
+										<div
 											key={child._id}
-											onClick={() => {
-												console.log("📱 Clicked mobile child:", child.title, "slug:", child.slug)
-												handleNavigate(child.slug)
-											}}
-											className="py-2 px-3 text-white hover:text-yellow-300 hover:bg-blue-700 rounded cursor-pointer transition-all duration-200"
+											onClick={() => handleNavigate(child.slug)}
+											className="w-full py-3.5 px-8 text-white hover:text-yellow-300 hover:bg-blue-700/60 cursor-pointer transition-all duration-200 active:bg-blue-700/80 border-t border-blue-600/50 first:border-t-0"
 										>
-											<span className="font-medium text-sm">{child.title}</span>
-										</li>
+											<div className="flex items-center">
+												<span className={`${menuItems.length > 7 ? 'text-xs' : 'text-sm'} font-medium`}>
+													{child.title}
+												</span>
+											</div>
+										</div>
 									))}
-								</ul>
+								</div>
 							)}
 						</div>
 					)}
 				</div>
 			))}
 
-			{/* Bog'lanish - har doim oxirgi */}
+			{/* Bog'lanish - div element */}
 			<div
 				onClick={() => handleNavigate("/contact")}
-				className="py-2 px-3 text-white hover:text-yellow-300 hover:bg-blue-700 rounded-lg cursor-pointer transition-all duration-200"
+				className="w-full py-4 px-5 text-white hover:text-yellow-300 hover:bg-blue-700/50 cursor-pointer transition-all duration-200 active:bg-blue-700/70 border-t border-blue-500/40"
 			>
-				<span className="font-medium text-sm">{t.contact}</span>
+				<div className="flex items-center">
+					<span className={`${menuItems.length > 7 ? 'text-sm' : 'text-base'} font-semibold`}>
+						{t.contact}
+					</span>
+				</div>
 			</div>
 		</div>
 	)
 
+	// Asosiy background
+	const mainBackground = "bg-blue-600"
+
+	// Navbar balandligini hisoblash
+	const getNavbarHeight = () => {
+		return menuItems.length > 7 ? "h-[120px]" : "h-[140px]"
+	}
+
 	return (
-		<nav className="sticky top-0 z-50 bg-gradient-to-r from-blue-900 to-blue-800 shadow-lg border-b-2 border-blue-700">
-			<div className="px-4 sm:px-6 lg:px-8 mx-auto">
-				{/* Bitta qator: Logo + Navigatsiya + Til tanlash */}
-				<div className="flex items-center justify-between py-3">
-					{/* Logo */}
-					<div
-						onClick={handleHomeNavigate}
-						className="flex items-center space-x-3 cursor-pointer group"
-					>
-						<img src="/logo.png" alt="Logo" className="h-10 sm:h-12 w-auto transition-transform group-hover:scale-105" />
-						{/* Logo yonidagi yozuv - faqat xl ekranlarda ko'rinadi */}
-						<div className="hidden xl:block">
-							<div className="text-sm md:text-base font-bold text-white leading-tight">
-								{t.samarkandRegion}
-							</div>
-							<div className="text-xs md:text-sm text-white font-semibold opacity-90 leading-tight">
-								{t.zarafshonIrrigation}
+		<>
+			{/* Navbar komponenti */}
+			<nav className={`fixed top-0 left-0 right-0 z-50 w-full ${mainBackground}`}>
+				{/* Tepa qismi - Logo va funksiyalar */}
+				<div className="px-4 sm:px-6 lg:px-8 xl:px-12 mx-auto">
+					<div className={`flex items-center justify-between ${menuItems.length > 7 ? 'py-3 lg:py-4' : 'py-4 lg:py-5'}`}>
+						{/* Logo va nom */}
+						<div
+							onClick={handleHomeNavigate}
+							className="flex items-center space-x-3 lg:space-x-4 cursor-pointer flex-shrink-0 group"
+						>
+							<img
+								src="/logo.png"
+								alt="Logo"
+								className={`${menuItems.length > 7 ? 'h-10 sm:h-12 lg:h-14' : 'h-12 sm:h-14 lg:h-16'} w-auto transition-transform duration-300 group-hover:scale-105`}
+							/>
+							<div className="hidden sm:block">
+								<div className={`${menuItems.length > 7 ? 'text-xs sm:text-sm lg:text-base' : 'text-sm sm:text-base lg:text-lg'} font-bold text-white leading-tight`}>
+									{t.samarkandRegion}
+								</div>
+								<div className={`${menuItems.length > 7 ? 'text-xs lg:text-sm' : 'text-xs sm:text-sm lg:text-base'} font-semibold text-white/90 mt-0.5 sm:mt-1 leading-tight max-w-xs sm:max-w-sm lg:max-w-md`}>
+									{t.zarafshonIrrigation}
+								</div>
 							</div>
 						</div>
-					</div>
 
-					{/* Asosiy navigatsiya menyusi - backend ma'lumotlari asosida */}
-					<div className="hidden md:flex items-center space-x-1 lg:space-x-2">
-						{renderDesktopMenu()}
-					</div>
-
-					{/* Til tanlash va mobil menyu */}
-					<div className="flex items-center space-x-2 sm:space-x-3">
-						{/* Maxsus Imkoniyatlar tugmasi */}
-						<button
-							onClick={handleAccessibilityClick}
-							className="p-1.5 text-white hover:text-yellow-300 transition-all duration-300 rounded-lg group"
-							title={t.accessibility}
-						>
-							<Eye size={18} className="group-hover:scale-110 transition-transform" />
-						</button>
-
-						{/* Til tanlash - responsive versiya */}
-						<div className="relative">
-							{/* Katta ekranlar uchun to'liq tanlov */}
-							<select
-								value={language}
-								onChange={(e) => handleLanguageChange(e.target.value)}
-								className="hidden sm:block appearance-none bg-white border border-gray-300 rounded-lg px-3 py-1.5 pr-8 focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-800 hover:border-gray-400 transition-colors cursor-pointer text-sm font-medium min-w-[120px]"
+						{/* O'ng tomondagi funksiyalar */}
+						<div className="flex items-center space-x-2 sm:space-x-3 lg:space-x-4">
+							{/* Maxsus Imkoniyatlar tugmasi */}
+							<button
+								onClick={handleAccessibilityClick}
+								className={`${menuItems.length > 7 ? 'p-1.5 sm:p-2' : 'p-2 sm:p-2.5'} text-white hover:text-yellow-300 hover:bg-blue-700/50 rounded-lg transition-all duration-300 group`}
+								title={t.accessibility}
 							>
-								<option value="uz" className="text-gray-700 bg-white">O'zbekcha</option>
-								<option value="ru" className="text-gray-700 bg-white">Русский</option>
-								<option value="en" className="text-gray-700 bg-white">English</option>
-							</select>
+								<Eye size={menuItems.length > 7 ? 18 : 20} className="sm:w-6 sm:h-6 group-hover:scale-110 transition-transform" />
+							</button>
 
-							{/* Kichik ekranlar uchun qisqartirilgan tanlov */}
-							<select
-								value={language}
-								onChange={(e) => handleLanguageChange(e.target.value)}
-								className="sm:hidden appearance-none bg-white border border-gray-300 rounded-lg px-2 py-1.5 pr-6 focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-800 hover:border-gray-400 transition-colors cursor-pointer text-xs font-medium min-w-[60px]"
+							{/* Til tanlash */}
+							<div className="relative">
+								<select
+									value={language}
+									onChange={(e) => handleLanguageChange(e.target.value)}
+									className={`appearance-none border border-white/40 rounded-lg ${menuItems.length > 7 ? 'px-2 sm:px-3 py-1 sm:py-1.5 pr-6 sm:pr-8 text-xs sm:text-sm' : 'px-3 sm:px-4 py-1.5 sm:py-2 pr-8 sm:pr-10 text-sm sm:text-base'} focus:outline-none focus:ring-1 focus:ring-yellow-300 cursor-pointer font-medium bg-blue-700/50 text-white hover:bg-blue-700 transition-all duration-300`}
+								>
+									<option value="uz" className="text-gray-900 bg-white">O'zbekcha</option>
+									<option value="ru" className="text-gray-900 bg-white">Русский</option>
+									<option value="en" className="text-gray-900 bg-white">English</option>
+								</select>
+								<ChevronDown
+									size={menuItems.length > 7 ? 14 : 16}
+									className={`absolute right-2 sm:right-3 top-1/2 transform -translate-y-1/2 text-white pointer-events-none ${menuItems.length > 7 ? 'w-3 h-3 sm:w-4 sm:h-4' : 'w-4 h-4 sm:w-5 sm:h-5'}`}
+								/>
+							</div>
+
+							{/* Mobil menyu tugmasi */}
+							<button
+								className="lg:hidden p-1.5 sm:p-2 rounded-lg border border-white/40 text-white hover:text-yellow-300 hover:border-yellow-300 hover:bg-blue-700/50 transition-all duration-300"
+								onClick={() => setMobileOpen((prev) => !prev)}
 							>
-								<option value="uz" className="text-gray-700 bg-white">UZ</option>
-								<option value="ru" className="text-gray-700 bg-white">RU</option>
-								<option value="en" className="text-gray-700 bg-white">EN</option>
-							</select>
-
-							<ChevronDown size={14} className="absolute right-1.5 sm:right-2 top-1/2 transform -translate-y-1/2 text-gray-600 pointer-events-none" />
-						</div>
-
-						{/* Mobil menyu tugmasi - faqat md dan kichik ekranlarda */}
-						<button
-							className="md:hidden p-2 rounded-lg border border-white/30 text-white hover:text-yellow-300 hover:border-yellow-300 transition-all duration-300"
-							onClick={() => setMobileOpen((prev) => !prev)}
-						>
-							<svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
 								{mobileOpen ? (
-									<path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+									<svg className="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+										<path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+									</svg>
 								) : (
-									<path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+									<svg className="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+										<path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+									</svg>
 								)}
-							</svg>
-						</button>
+							</button>
+						</div>
 					</div>
 				</div>
 
-				{/* Mobil menyu - Backend ma'lumotlari asosida */}
+				{/* Pastki qismi - Asosiy navigatsiya menyusi */}
+				<div className="hidden lg:block bg-blue-600">
+					<div className="px-4 sm:px-6 lg:px-8 xl:px-12 mx-auto">
+						<div className={`flex justify-center items-center ${menuItems.length > 7 ? 'py-1' : 'py-2'}`}>
+							{renderDesktopMenu()}
+						</div>
+					</div>
+				</div>
+
+				{/* Mobil menyu - TO'LIQ TUZATILGAN */}
 				<div
-					className={`md:hidden border-t border-white/20 transition-all duration-300 ${mobileOpen ? "max-h-[500px] opacity-100 pb-3" : "max-h-0 opacity-0"}`}
-					style={{
-						overflow: mobileOpen ? 'visible' : 'hidden',
-						zIndex: 1000
-					}}
+					className={`lg:hidden transition-all duration-300 ${mobileOpen ? "block opacity-100" : "hidden opacity-0"}`}
 				>
 					{renderMobileMenu()}
 				</div>
-			</div>
+			</nav>
+
+			{/* Bo'sh joy - Navbar balandligiga teng margin-top */}
+			<div className={`${getNavbarHeight()} w-full`} />
 
 			{/* Maxsus Imkoniyatlar Sidebar */}
-			<div className={`fixed top-0 right-0 h-full w-80 sm:w-96 bg-white shadow-2xl z-50 transform transition-transform duration-300 ease-in-out ${showAccessibilityModal ? 'translate-x-0' : 'translate-x-full'}`}>
+			<div className={`fixed top-0 right-0 h-full w-80 sm:w-96 bg-white z-50 transform transition-transform duration-300 ease-in-out ${showAccessibilityModal ? 'translate-x-0' : 'translate-x-full'}`}>
 				{/* Sidebar sarlavhasi */}
 				<div className="bg-blue-600 text-white p-6 flex justify-between items-center">
 					<div>
@@ -479,45 +489,47 @@ const Navbar = () => {
 					</div>
 					<button
 						onClick={handleCloseModal}
-						className="text-white hover:text-yellow-300 transition-colors p-1 rounded-lg"
+						className="text-white hover:text-yellow-300 transition-colors p-1 rounded-lg hover:bg-blue-500/30"
 					>
 						<X size={24} />
 					</button>
 				</div>
 
 				{/* Sidebar kontenti */}
-				<div className="p-6 space-y-6 overflow-y-auto h-[calc(100vh-120px)]">
+				<div className="p-6 space-y-8 overflow-y-auto h-[calc(100vh-120px)]">
 					{/* Mavzu */}
 					<div>
-						<h3 className="text-lg font-semibold  text-gray-800 mb-3">{t.theme}</h3>
-						<div className="grid grid-cols-2 gap-3">
+						<h3 className="text-lg font-semibold text-gray-800 mb-4">{t.theme}</h3>
+						<div className="grid grid-cols-2 gap-4">
 							<button
 								onClick={() => handleThemeChange('normal')}
-								className={`py-4 px-4 border text-black rounded-lg transition-colors flex items-center justify-center gap-3 ${accessibilitySettings.theme === 'normal'
+								className={`py-4 px-4 border rounded-lg transition-all duration-300 flex items-center justify-center gap-3 ${accessibilitySettings.theme === 'normal'
 									? 'border-blue-500 bg-blue-50 text-blue-700'
-									: 'border-gray-300 hover:border-blue-500'
+									: 'border-gray-300 hover:border-blue-400'
 									}`}
 							>
-								<Sun size={20} />
+								<Sun size={22} />
+								<span className="text-base font-medium">{t.normalTheme}</span>
 							</button>
 							<button
 								onClick={() => handleThemeChange('grayscale')}
-								className={`py-4 px-4 border text-black rounded-lg transition-colors flex items-center justify-center gap-3 ${accessibilitySettings.theme === 'grayscale'
+								className={`py-4 px-4 border rounded-lg transition-all duration-300 flex items-center justify-center gap-3 ${accessibilitySettings.theme === 'grayscale'
 									? 'border-blue-500 bg-blue-50 text-blue-700'
-									: 'border-gray-300 hover:border-blue-500'
+									: 'border-gray-300 hover:border-blue-400'
 									}`}
 							>
-								<Moon size={20} />
+								<Moon size={22} />
+								<span className="text-base font-medium">{t.grayscaleTheme}</span>
 							</button>
 						</div>
 					</div>
 
 					{/* Shrift o'lchami */}
 					<div>
-						<h3 className="text-lg font-semibold text-gray-800 mb-3">
-							{t.fontSize} - {accessibilitySettings.fontSize}%
+						<h3 className="text-lg font-semibold text-gray-800 mb-4">
+							{t.fontSize} - <span className="text-blue-600">{accessibilitySettings.fontSize}%</span>
 						</h3>
-						<div className="bg-gray-100 rounded-lg p-1">
+						<div className="bg-gray-50 rounded-lg p-5">
 							<div className="relative">
 								<input
 									type="range"
@@ -528,24 +540,11 @@ const Navbar = () => {
 									onChange={(e) => handleFontSizeChange(Number(e.target.value))}
 									className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer slider"
 								/>
-								<div className="flex justify-between text-xs text-gray-500 mt-2">
-									<span>50%</span>
-									<span>75%</span>
-									<span>100%</span>
-									<span>125%</span>
-									<span>150%</span>
-									<span>175%</span>
-									<span>200%</span>
-								</div>
-							</div>
-						</div>
-						<div className="flex justify-center mt-4">
-							<div className="text-center">
-								<div className={`text-${accessibilitySettings.fontSize >= 150 ? 'xl' : accessibilitySettings.fontSize >= 120 ? 'lg' : 'base'} font-bold text-gray-800`}>
-									Namuna matn
-								</div>
-								<div className={`text-${accessibilitySettings.fontSize >= 150 ? 'lg' : accessibilitySettings.fontSize >= 120 ? 'base' : 'sm'} text-gray-600 mt-1`}>
-									Shrift o'lchami: {accessibilitySettings.fontSize}%
+								<div className="flex justify-between text-sm text-gray-600 mt-3">
+									<span className="font-medium">50%</span>
+									<span className="font-medium">100%</span>
+									<span className="font-medium">150%</span>
+									<span className="font-medium">200%</span>
 								</div>
 							</div>
 						</div>
@@ -553,16 +552,16 @@ const Navbar = () => {
 				</div>
 
 				{/* Sidebar pastki qismi */}
-				<div className="absolute bottom-0 left-0 right-0 bg-gray-50 px-6 py-4 border-t border-gray-200 flex justify-between items-center">
+				<div className="absolute bottom-0 left-0 right-0 bg-gray-50 px-6 py-5 border-t border-gray-300 flex justify-between items-center">
 					<button
 						onClick={handleResetAll}
-						className="px-6 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-100 transition-colors"
+						className="px-6 py-2.5 border border-gray-400 text-gray-700 rounded-lg hover:bg-gray-200 transition-all duration-300 font-medium text-sm"
 					>
 						{t.reset}
 					</button>
 					<button
 						onClick={handleCloseModal}
-						className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+						className="px-6 py-2.5 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-all duration-300 font-medium text-sm"
 					>
 						{t.close}
 					</button>
@@ -576,7 +575,7 @@ const Navbar = () => {
 					onClick={handleCloseModal}
 				/>
 			)}
-		</nav>
+		</>
 	)
 }
 

@@ -149,19 +149,8 @@ const News = () => {
 
 	if (loading) {
 		return (
-			<section id="news" className="py-12 sm:py-16 lg:py-20 relative min-h-screen">
-				{/* Background image - partner2.jpg */}
-				<div
-					className="absolute inset-0 bg-cover bg-center bg-no-repeat"
-					style={{
-						backgroundImage: `url('/partner2.jpg')`,
-					}}
-				/>
-
-				{/* Overlay - juda yengil */}
-				<div className="absolute inset-0 bg-white/30 backdrop-blur-sm"></div>
-
-				<div className="container mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+			<section id="news" className="py-12 sm:py-16 lg:py-20 bg-white">
+				<div className="container mx-auto px-4 sm:px-6 lg:px-8">
 					<div className="text-center mb-8 sm:mb-12">
 						<h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold text-gray-800 mb-3 sm:mb-4">
 							{t.title}
@@ -178,19 +167,8 @@ const News = () => {
 	}
 
 	return (
-		<section id="news" className="py-12 sm:py-16 lg:py-20 relative min-h-screen">
-			{/* Background image - partner2.jpg */}
-			<div
-				className="absolute inset-0 bg-cover bg-center bg-no-repeat"
-				style={{
-					backgroundImage: `url('/partner2.jpg')`,
-				}}
-			/>
-
-			{/* Overlay - juda yengil, rasm yorqin ko'rinsin */}
-			<div className="absolute inset-0 bg-white/30 backdrop-blur-sm"></div>
-
-			<div className="container mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+		<section id="news" className="py-12 sm:py-16 lg:py-20 bg-white">
+			<div className="container mx-auto px-4 sm:px-6 lg:px-8">
 				{/* Sarlavha */}
 				<div className="text-center mb-8 sm:mb-12 lg:mb-16">
 					<h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold text-gray-800 mb-3 sm:mb-4">
@@ -206,7 +184,6 @@ const News = () => {
 				<div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8 mb-8 sm:mb-12 lg:mb-16">
 					{displayedNews.map((item, index) => {
 						const photoUrl = getImageUrl(getRandomPhoto(item.photos))
-						console.log('Rasm URL:', photoUrl) // Debug uchun
 						return (
 							<div
 								key={item._id || item.id || index}
@@ -219,7 +196,6 @@ const News = () => {
 										alt={item.title}
 										className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
 										onError={(e) => {
-											// Agar rasm yuklanmasa, default rasmni ko'rsatish
 											console.error('Rasm yuklanmadi:', photoUrl)
 											e.target.src = '/partner2.jpg'
 										}}
@@ -232,29 +208,22 @@ const News = () => {
 									<div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
 								</div>
 
-								{/* Kontent qismi */}
+								{/* Kontent qismi - faqat title va meta ma'lumotlar */}
 								<div className="p-4 sm:p-6">
 									{/* Sana va ko'rishlar */}
-									<div className="flex items-center justify-between mb-2 sm:mb-3">
+									<div className="flex items-center justify-between mb-3 sm:mb-4">
 										<div className="flex items-center gap-1 sm:gap-2 text-gray-500 text-xs sm:text-sm">
 											<Calendar size={14} className="sm:w-4 sm:h-4" />
 											<span>{formatDate(item.createdAt)}</span>
 										</div>
 										<div className="flex items-center gap-1 text-gray-500 text-xs sm:text-sm">
-											<Eye size={14} className="sm:w-4 sm:h-4" />
-											<span>{item.views || 0}</span>
 										</div>
 									</div>
 
-									{/* Sarlavha */}
-									<h3 className="text-lg sm:text-xl font-bold text-gray-800 mb-2 sm:mb-3 line-clamp-2 group-hover:text-blue-600 transition-colors leading-tight">
+									{/* Sarlavha - kattaroq va markazda */}
+									<h3 className="text-xl sm:text-2xl font-bold text-gray-800 text-center group-hover:text-blue-600 transition-colors leading-tight min-h-[60px] flex items-center justify-center">
 										{item.title}
 									</h3>
-
-									{/* Tavsif */}
-									<p className="text-gray-600 text-sm sm:text-base mb-3 sm:mb-4 line-clamp-3 leading-relaxed">
-										{item.description}
-									</p>
 								</div>
 							</div>
 						)

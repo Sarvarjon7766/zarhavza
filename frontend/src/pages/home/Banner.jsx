@@ -60,15 +60,15 @@ const Banner = () => {
 	// 🌐 Tarjima matnlari
 	const translations = {
 		uz: {
-			title: "Zarafshon irrigatsiya tizimlari boshqarmasi",
+			title: "Zarafshon irrigatsiya tizimlari havza boshqarmasi",
 			watchVideo: "Video rolik ko'rish",
 		},
 		ru: {
-			title: 'Департамент ирригационных систем Зарафшана',
+			title: 'Зарафшанское управление бассейна ирригационных систем',
 			watchVideo: "Смотреть видео",
 		},
 		en: {
-			title: 'Zarafshan Irrigation Systems Department',
+			title: 'Zarafshan Basin Irrigation Systems Authority',
 			watchVideo: "Watch Video",
 		},
 	}

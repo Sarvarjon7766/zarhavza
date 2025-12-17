@@ -1,15 +1,17 @@
-const GeneralNewsService = require('../services/general.news.service')
+const GeneralLeaderService = require('../services/generalleader.service')
 
-class GeneralNewsController {
+class GeneralLeaderController {
 	async create(req, res) {
 		try {
+			console.log("req.body")
 			console.log(req.body)
-			const photos = req.files ? req.files.map(file => `/uploads/${file.filename}`) : []
+			console.log("req.body")
+			const photo = req.file && `/uploads/${req.file.filename}`
 			const data = {
 				...req.body,
-				photos
+				photo
 			}
-			const result = await GeneralNewsService.create(data)
+			const result = await GeneralLeaderService.create(data)
 			if (result.success) {
 				return res.status(201).json(result)
 			} else {
@@ -22,13 +24,12 @@ class GeneralNewsController {
 	}
 	async update(req, res) {
 		try {
-			console.log(req.body)
-			const photos = req.files ? req.files.map(file => `/uploads/${file.filename}`) : []
+			const photo = req.file && `/uploads/${req.file.filename}`
 			const data = {
 				...req.body,
-				photos
+				photo
 			}
-			const result = await GeneralNewsService.update(req.params.id, data)
+			const result = await GeneralLeaderService.update(req.params.id, data)
 			if (result.success) {
 				return res.status(200).json(result)
 			} else {
@@ -41,7 +42,7 @@ class GeneralNewsController {
 	}
 	async deleted(req, res) {
 		try {
-			const result = await GeneralNewsService.deleted(req.params.id)
+			const result = await GeneralLeaderService.deleted(req.params.id)
 			if (result.success) {
 				return res.status(200).json(result)
 			} else {
@@ -54,7 +55,7 @@ class GeneralNewsController {
 	}
 	async getAlll(req, res) {
 		try {
-			const result = await GeneralNewsService.getAlll(req.params.key)
+			const result = await GeneralLeaderService.getAlll(req.params.key)
 			if (result.success) {
 				return res.status(200).json(result)
 			} else {
@@ -69,7 +70,7 @@ class GeneralNewsController {
 	}
 	async getAll(req, res) {
 		try {
-			const result = await GeneralNewsService.getAll(req.params.key, req.params.lang)
+			const result = await GeneralLeaderService.getAll(req.params.key, req.params.lang)
 			if (result.success) {
 				return res.status(200).json(result)
 			} else {
@@ -84,7 +85,7 @@ class GeneralNewsController {
 	}
 	async getOne(req, res) {
 		try {
-			const result = await GeneralNewsService.getAll(req.params.key, req.params.lang)
+			const result = await GeneralLeaderService.getAll(req.params.key, req.params.lang)
 			if (result.success) {
 				return res.status(200).json(result)
 			} else {
@@ -98,4 +99,4 @@ class GeneralNewsController {
 		}
 	}
 }
-module.exports = new GeneralNewsController()
+module.exports = new GeneralLeaderController()

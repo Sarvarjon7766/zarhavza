@@ -14,6 +14,10 @@ const applicationSchema = new Schema({
 	message: {
 		type: String,
 	},
+	reply_message:{
+		type:String,
+		
+	},
 	isStatus: {
 		type: Boolean,
 		default: false,

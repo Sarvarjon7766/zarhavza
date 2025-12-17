@@ -23,7 +23,7 @@ const AdditionalNavigationAdd = () => {
 		order: 0,
 		isActive: true,
 		key: '',
-		parent: null // Parent ID - asosiy navigatsiyalardan birini tanlash uchun
+		parent: null
 	})
 
 	// Iconlar ro'yxati
@@ -31,6 +31,16 @@ const AdditionalNavigationAdd = () => {
 		'🏠', 'ℹ', '📊', '🏃‍♂️', '📰', '🖼️', '📄', '🔗', '🧭', '⭐',
 		'📸', '📅', '⚙️', '❓', '🈸', '📍', '📢', '🎯', '💼', '👥',
 		'🌐', '📱', '💻', '🔒', '📈', '💰', '🏢', '📞', '✉️', '🔍'
+	]
+
+	// Type variantlari
+	const typeOptions = [
+		{ value: 'static', label: 'Static sahifa', icon: '📄' },
+		{ value: 'news', label: 'Yangiliklar', icon: '📰' },
+		{ value: 'gallery', label: 'Galereya', icon: '🖼️' },
+		{ value: 'documents', label: 'Hujjatlar', icon: '📑' },
+		{ value: 'leader', label: 'Rahbariyat', icon: '👥' },
+		{ value: 'communication', label: 'Aloqa', icon: '📞' }
 	]
 
 	// Asosiy navigatsiyalarni olish (parent lar uchun)
@@ -207,6 +217,15 @@ const AdditionalNavigationAdd = () => {
 		handleInputChange('parent', parentValue)
 	}
 
+	// Type tanlanganda avtomatik icon o'rnatish
+	const handleTypeChange = (value) => {
+		const selectedOption = typeOptions.find(option => option.value === value)
+		if (selectedOption && !formData.icon) {
+			handleInputChange('icon', selectedOption.icon)
+		}
+		handleInputChange('type', value)
+	}
+
 	return (
 		<div className="p-6">
 			{/* Sarlavha */}
@@ -241,7 +260,7 @@ const AdditionalNavigationAdd = () => {
 							<option value="">Asosiy navigatsiyani tanlang</option>
 							{parentPages.map((page) => (
 								<option key={page._id} value={page._id}>
-									{page.icon} {page.title.uz} ({page.slug})
+									{page.icon} {page.title.uz} ({page.type})
 								</option>
 							))}
 						</select>
@@ -249,6 +268,24 @@ const AdditionalNavigationAdd = () => {
 							Ushbu qo'shimcha navigatsiya qaysi asosiy navigatsiya ostida bo'lishini tanlang
 						</p>
 					</div>
+
+					{/* Type info - Agar asosiy navigatsiya tanlangan bo'lsa */}
+					{formData.parent && (
+						<div className="md:col-span-2">
+							<div className="p-3 bg-blue-50 border border-blue-200 rounded-lg">
+								<h4 className="font-medium text-blue-700 mb-1">
+									{parentPages.find(p => p._id === formData.parent)?.icon}
+									{parentPages.find(p => p._id === formData.parent)?.title.uz}
+								</h4>
+								<p className="text-sm text-blue-600">
+									Tur: <span className="font-medium">{parentPages.find(p => p._id === formData.parent)?.type}</span>
+									{parentPages.find(p => p._id === formData.parent)?.slug &&
+										<span> • Slug: <span className="font-medium">{parentPages.find(p => p._id === formData.parent)?.slug}</span></span>
+									}
+								</p>
+							</div>
+						</div>
+					)}
 
 					{/* O'zbekcha sarlavha */}
 					<div>
@@ -261,7 +298,9 @@ const AdditionalNavigationAdd = () => {
 							onChange={(e) => handleTitleChange('uz', e.target.value)}
 							className="w-full px-3 py-2 border text-black border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
 							required
-							placeholder="Bizning jamoa"
+							placeholder={formData.type === 'leader' ? 'Kichik rahbarlar' :
+								formData.type === 'communication' ? 'Mahalliy aloqa' :
+									'Bizning jamoa'}
 							disabled={loading}
 						/>
 					</div>
@@ -277,7 +316,9 @@ const AdditionalNavigationAdd = () => {
 							onChange={(e) => handleInputChange('title.en', e.target.value)}
 							className="w-full px-3 py-2 border text-black border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
 							required
-							placeholder="Our Team"
+							placeholder={formData.type === 'leader' ? 'Sub Leaders' :
+								formData.type === 'communication' ? 'Local Contact' :
+									'Our Team'}
 							disabled={loading}
 						/>
 					</div>
@@ -293,7 +334,9 @@ const AdditionalNavigationAdd = () => {
 							onChange={(e) => handleInputChange('title.ru', e.target.value)}
 							className="w-full px-3 py-2 text-black border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
 							required
-							placeholder="Наша команда"
+							placeholder={formData.type === 'leader' ? 'Подруководство' :
+								formData.type === 'communication' ? 'Местный контакт' :
+									'Наша команда'}
 							disabled={loading}
 						/>
 					</div>
@@ -304,21 +347,23 @@ const AdditionalNavigationAdd = () => {
 							Slug *
 						</label>
 						<div className="flex items-center">
-							<span className="px-3 py-2 bg-gray-100 border border-r-0 border-gray-300 rounded-l-md text-gray-500">
-								/
-							</span>
+							
 							<input
 								type="text"
 								value={formData.slug}
 								onChange={(e) => handleSlugChange(e.target.value)}
 								className="w-full px-3 py-2 border text-black border-gray-300 rounded-r-md focus:outline-none focus:ring-2 focus:ring-blue-500"
 								required
-								placeholder="our-team"
+								placeholder={formData.type === '/leader' ? '/sub-leaders' :
+									formData.type === '/communication' ? '/local-contact' :
+										'/our-team'}
 								disabled={loading || isEditing}
 							/>
 						</div>
 						<p className="text-xs text-gray-500 mt-1">
-							URL manzili, masalan: our-team
+							URL manzili, masalan: {formData.type === '/leader' ? '/sub-leaders' :
+								formData.type === '/communication' ? '/local-contact' :
+									'/our-team'}
 							{isEditing && <span className="text-orange-500 ml-1">(Yangilashda o'zgarmaydi)</span>}
 						</p>
 					</div>
@@ -334,7 +379,9 @@ const AdditionalNavigationAdd = () => {
 							onChange={(e) => handleKeyChange(e.target.value)}
 							className="w-full px-3 py-2 border text-black border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
 							required
-							placeholder="our_team"
+							placeholder={formData.type === 'leader' ? 'sub_leaders' :
+								formData.type === 'communication' ? 'local_contact' :
+									'our_team'}
 							disabled={loading || isEditing}
 						/>
 						<p className="text-xs text-gray-500 mt-1">
@@ -343,8 +390,49 @@ const AdditionalNavigationAdd = () => {
 						</p>
 					</div>
 
+					{/* Type */}
+					<div>
+						<label className="block text-sm font-medium text-gray-700 mb-2">
+							Turi *
+						</label>
+						<div className="grid grid-cols-2 md:grid-cols-3 gap-2 mb-2">
+							{typeOptions.map((option) => (
+								<button
+									key={option.value}
+									type="button"
+									onClick={() => !loading && handleTypeChange(option.value)}
+									disabled={loading}
+									className={`flex items-center gap-2 px-3 py-2 rounded-md border transition-all ${formData.type === option.value
+										? 'border-blue-500 bg-blue-50 text-blue-700'
+										: 'border-gray-300 bg-white text-gray-700 hover:border-gray-400'
+										} ${loading ? 'opacity-50 cursor-not-allowed' : ''}`}
+								>
+									<span className="text-lg">{option.icon}</span>
+									<span className="text-sm">{option.label}</span>
+								</button>
+							))}
+						</div>
+						<select
+							value={formData.type}
+							onChange={(e) => handleTypeChange(e.target.value)}
+							className="w-full px-3 py-2 border border-gray-300 text-black rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+							disabled={loading}
+						>
+							{typeOptions.map((option) => (
+								<option key={option.value} value={option.value}>
+									{option.label}
+								</option>
+							))}
+						</select>
+						<p className="text-xs text-gray-500 mt-1">
+							{formData.type === 'leader' ? 'Rahbariyat sahifasi uchun' :
+								formData.type === 'communication' ? 'Aloqa sahifasi uchun' :
+									'Sahifa turini tanlang'}
+						</p>
+					</div>
+
 					{/* Icon */}
-					<div className="md:col-span-2">
+					<div>
 						<label className="block text-sm font-medium text-gray-700 mb-2">
 							Icon
 						</label>
@@ -379,29 +467,13 @@ const AdditionalNavigationAdd = () => {
 								value={formData.icon}
 								onChange={(e) => handleInputChange('icon', e.target.value)}
 								className="w-full px-3 py-2 border text-black border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-								placeholder="👥 yoki ℹ"
+								placeholder={formData.type === 'leader' ? '👥' :
+									formData.type === 'communication' ? '📞' :
+										'👥'}
 								maxLength="2"
 								disabled={loading}
 							/>
 						</div>
-					</div>
-
-					{/* Type */}
-					<div>
-						<label className="block text-sm font-medium text-gray-700 mb-2">
-							Turi *
-						</label>
-						<select
-							value={formData.type}
-							onChange={(e) => handleInputChange('type', e.target.value)}
-							className="w-full px-3 py-2 border border-gray-300 text-black rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-							disabled={loading}
-						>
-							<option value="static">Static sahifa</option>
-							<option value="news">Yangiliklar</option>
-							<option value="gallery">Galereya</option>
-							<option value="documents">Hujjatlar</option>
-						</select>
 					</div>
 
 					{/* Order */}
@@ -432,6 +504,35 @@ const AdditionalNavigationAdd = () => {
 						<label htmlFor="isActive" className="ml-2 text-sm font-medium text-gray-700">
 							Faol
 						</label>
+					</div>
+
+					{/* Type haqida qo'shimcha ma'lumot */}
+					<div className="md:col-span-2">
+						<div className={`p-3 rounded-lg ${formData.type === 'leader' ? 'bg-blue-50 border border-blue-200' :
+							formData.type === 'communication' ? 'bg-green-50 border border-green-200' :
+								'bg-gray-50 border border-gray-200'}`}>
+							<h4 className="font-medium mb-1">
+								{formData.type === 'leader' ? 'Rahbariyat sahifasi:' :
+									formData.type === 'communication' ? 'Aloqa sahifasi:' :
+										formData.type === 'gallery' ? 'Galereya sahifasi:' :
+											formData.type === 'news' ? 'Yangiliklar sahifasi:' :
+												formData.type === 'documents' ? 'Hujjatlar sahifasi:' :
+													'Static sahifa:'}
+							</h4>
+							<p className="text-sm text-gray-600">
+								{formData.type === 'leader' ? 'Rahbarlar haqida ma\'lumotlar (FIO, lavozim, telefon, email, manzil, ish vaqti, vazifalar, biografiya)' :
+									formData.type === 'communication' ? 'Aloqa ma\'lumotlari (manzil, telefon, email, xaritada joylashuv)' :
+										formData.type === 'gallery' ? 'Rasm va videolar galereyasi' :
+											formData.type === 'news' ? 'Yangiliklar ro\'yxati' :
+												formData.type === 'documents' ? 'Hujjatlar va fayllar' :
+													'Oddiy matnli sahifa'}
+							</p>
+							{formData.parent && (
+								<p className="text-xs text-gray-500 mt-1">
+									Asosiy sahifa: <span className="font-medium">{parentPages.find(p => p._id === formData.parent)?.title.uz}</span>
+								</p>
+							)}
+						</div>
 					</div>
 				</div>
 

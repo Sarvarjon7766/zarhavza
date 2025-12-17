@@ -89,7 +89,7 @@ const Footer = () => {
 	// Tarjima matnlari - Zarafshon irrigatsiya tizimlari boshqarmasi uchun
 	const translations = {
 		uz: {
-			organizationName: '"Zarafshon irrigatsiya tizimlari boshqarmasi"',
+			organizationName: 'Zarafshon irrigatsiya tizimlari havza boshqarmasi',
 			organizationType: "Davlat muassasasi",
 			description: "Suv resurslarini samarali boshqarish va qishloq xo'jaligini suv bilan ta'minlash bo'yicha yetakchi tashkilot. Zarafshon vodiysida irrigatsiya tizimlarini boshqarish va rivojlantirish.",
 			contactInfo: "Aloqa Ma'lumotlari",
@@ -104,7 +104,7 @@ const Footer = () => {
 			fax: "Faks"
 		},
 		ru: {
-			organizationName: '"Управление Заравшанских ирригационных систем"',
+			organizationName: 'Зарафшанское управление бассейна ирригационных систем',
 			organizationType: "Государственное учреждение",
 			description: "Ведущая организация по эффективному управлению водными ресурсами и водоснабжению сельского хозяйства. Управление и развитие ирригационных систем в долине Заравшана.",
 			contactInfo: "Контактная Информация",
@@ -119,7 +119,7 @@ const Footer = () => {
 			fax: "Факс"
 		},
 		en: {
-			organizationName: '"Zarafshon Irrigation Systems Administration"',
+			organizationName: 'Zarafshan Basin Irrigation Systems Authority',
 			organizationType: "State Institution",
 			description: "Leading organization for efficient water resources management and agricultural water supply. Management and development of irrigation systems in the Zarafshon Valley.",
 			contactInfo: "Contact Information",
@@ -140,7 +140,7 @@ const Footer = () => {
 	// Yuklanish holatida ko'rsatish
 	if (loading) {
 		return (
-			<footer className="bg-gradient-to-r from-blue-900 to-blue-800 text-white">
+			<footer className="bg-blue-600 text-white">
 				<div className="container mx-auto px-4 sm:px-6 lg:px-8 py-12">
 					<div className="flex justify-center items-center">
 						<div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-white"></div>
@@ -152,7 +152,7 @@ const Footer = () => {
 	}
 
 	return (
-		<footer className="bg-gradient-to-r from-blue-900 to-blue-800 text-white">
+		<footer className="bg-blue-600 text-white">
 			{/* Asosiy footer kontenti */}
 			<div className="container mx-auto px-4 sm:px-6 lg:px-8 py-12">
 				<div className="grid grid-cols-1 md:grid-cols-2 gap-8 lg:gap-12">
@@ -191,7 +191,7 @@ const Footer = () => {
 						<div className="space-y-3">
 							{getPhoneNumbers().map((phone, index) => (
 								<div key={index} className="flex items-center gap-3 text-blue-100 hover:text-white transition-colors">
-									<div className="w-10 h-10 bg-blue-700 rounded-full flex items-center justify-center">
+									<div className="w-10 h-10 bg-blue-600 rounded-full flex items-center justify-center">
 										<Phone size={18} />
 									</div>
 									<div>
@@ -207,7 +207,7 @@ const Footer = () => {
 						{/* Email */}
 						{contactData?.email && (
 							<div className="flex items-center gap-3 text-blue-100 hover:text-white transition-colors">
-								<div className="w-10 h-10 bg-blue-700 rounded-full flex items-center justify-center">
+								<div className="w-10 h-10 bg-blue-600 rounded-full flex items-center justify-center">
 									<Mail size={18} />
 								</div>
 								<div>
@@ -219,7 +219,7 @@ const Footer = () => {
 
 						{/* Manzil */}
 						<div className="flex items-start gap-3 text-blue-100 hover:text-white transition-colors">
-							<div className="w-10 h-10 bg-blue-700 rounded-full flex items-center justify-center mt-1">
+							<div className="w-10 h-10 bg-blue-600 rounded-full flex items-center justify-center mt-1">
 								<MapPin size={18} />
 							</div>
 							<div>

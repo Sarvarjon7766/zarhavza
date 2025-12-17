@@ -80,7 +80,7 @@ const AllNews = ({ pageData }) => {
 			{
 				id: 1,
 				title: "Yangi loyiha ishga tushdi",
-				description: "Urgut EIZda yangi sanoat loyihasi muvaffaqiyatli ishga tushirildi. Loyiha mintaqa iqtisodiyotiga sezilarli hissa qo'shadi. Bu loyiha orqali mintaqada 500 dan ortiq yangi ish o'rinlari yaratildi va mahalliy iqtisodiyotning rivojlanishiga katta turtki bo'ldi.",
+				description: "<p><strong>Urgut EIZ</strong>da yangi sanoat loyihasi muvaffaqiyatli ishga tushirildi. Loyiha mintaqa iqtisodiyotiga sezilarli hissa qo'shadi.</p>",
 				photos: ["/partner1.jpg", "/partner1.jpg", "/partner1.jpg"],
 				createdAt: "2025-10-30",
 				views: 124
@@ -88,7 +88,7 @@ const AllNews = ({ pageData }) => {
 			{
 				id: 2,
 				title: "Investorlar bilan uchrashuv",
-				description: "Xalqaro investorlar bilan bo'lib o'tgan uchrashuvda yangi hamkorlik shartnomalari imzolandi. Ushbu uchrashuvda 10 dan ortiq mamlakatlarning yetakchi kompaniyalari ishtirok etdi va kelajakda hamkorlikni kengaytirish bo'yicha kelishuvlarga erishildi.",
+				description: "<p>Xalqaro investorlar bilan bo'lib o'tgan uchrashuvda yangi <strong>hamkorlik shartnomalari</strong> imzolandi.</p>",
 				photos: ["/partner1.jpg", "/partner1.jpg"],
 				createdAt: "2025-10-25",
 				views: 89
@@ -96,7 +96,7 @@ const AllNews = ({ pageData }) => {
 			{
 				id: 3,
 				title: "Hudud infratuzilmasi rivojlanmoqda",
-				description: "Erkin iqtisodiy zona hududida yangi infratuzilma loyihalari amalga oshirilmog'da. Yangi yo'llar, kommunikatsiya tarmoqlari va energetika ob'ektlari qurilmoqda, bu esa mintaqaning investorlar uchun jozibadorligini oshiradi.",
+				description: "<p>Erkin iqtisodiy zona hududida yangi <em>infratuzilma loyihalari</em> amalga oshirilmog'da.</p>",
 				photos: ["/partner1.jpg"],
 				createdAt: "2025-10-20",
 				views: 156
@@ -104,7 +104,7 @@ const AllNews = ({ pageData }) => {
 			{
 				id: 4,
 				title: "Yangi ish o'rinlari yaratildi",
-				description: "Yangi korxonalar ochilishi natijasida 500 dan ortiq ish o'rinlari yaratildi. Bu esa mintaqa aholisining bandligini oshirishga yordam beradi va yoshlar uchun yangi imkoniyatlar yaratadi.",
+				description: "<p>Yangi korxonalar ochilishi natijasida <strong>500 dan ortiq</strong> ish o'rinlari yaratildi.</p>",
 				photos: ["/partner1.jpg", "/partner1.jpg"],
 				createdAt: "2025-10-15",
 				views: 203
@@ -112,7 +112,7 @@ const AllNews = ({ pageData }) => {
 			{
 				id: 5,
 				title: "Eksport hajmi oshdi",
-				description: "So'nggi chorakda mintaqadan eksport hajmi 25% ga o'sdi. Asosan qishloq xo'jalik mahsulotlari, to'qimachilik va metall buyumlar eksporti sezilarli darajada oshdi.",
+				description: "<p>So'nggi chorakda mintaqadan eksport hajmi <strong>25% ga o'sdi</strong>.</p>",
 				photos: ["/partner1.jpg"],
 				createdAt: "2025-10-10",
 				views: 167
@@ -120,7 +120,7 @@ const AllNews = ({ pageData }) => {
 			{
 				id: 6,
 				title: "Texnologiya markazi ochildi",
-				description: "Yosh ixtirochilar va startup'lar uchun zamonaviy texnologiya markazi ochildi. Markazda zamonaviy kompyuterlar, 3D printerlar va boshqa ilg'or texnologiyalar mavjud.",
+				description: "<p>Yosh ixtirochilar va <em>startup'lar</em> uchun zamonaviy texnologiya markazi ochildi.</p>",
 				photos: ["/partner1.jpg", "/partner1.jpg", "/partner1.jpg"],
 				createdAt: "2025-10-05",
 				views: 98
@@ -178,6 +178,14 @@ const AllNews = ({ pageData }) => {
 		return { images, videos }
 	}
 
+	// HTML description ni tozalash (faqat text olish)
+	const stripHtml = (html) => {
+		if (!html) return ''
+		const tmp = document.createElement("DIV")
+		tmp.innerHTML = html
+		return tmp.textContent || tmp.innerText || ""
+	}
+
 	// Yangilikni ochish
 	const handleOpenNews = (newsItem) => {
 		setSelectedNews(newsItem)
@@ -212,6 +220,10 @@ const AllNews = ({ pageData }) => {
 					src={mediaUrl}
 					alt={`Media ${index + 1}`}
 					className={`w-full h-full object-cover rounded-lg ${className}`}
+					onError={(e) => {
+						console.error('Rasm yuklanmadi:', mediaUrl)
+						e.target.src = '/partner1.jpg'
+					}}
 				/>
 			)
 		}
@@ -361,7 +373,7 @@ const AllNews = ({ pageData }) => {
 							<p className="text-gray-500 text-lg">{t.noData}</p>
 						</div>
 					) : (
-						/* 🔹 News grid */
+						/* 🔹 News grid - FAQAT TITLE KO'RSATILADI */
 						<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
 							{news.map((item, index) => {
 								const mediaCounts = getMediaCounts(item.photos)
@@ -370,7 +382,7 @@ const AllNews = ({ pageData }) => {
 
 								return (
 									<div
-										key={item.id || index}
+										key={item._id || item.id || index}
 										className="group bg-white rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-2 overflow-hidden border border-gray-100 cursor-pointer"
 										onClick={() => handleOpenNews(item)}
 									>
@@ -393,15 +405,6 @@ const AllNews = ({ pageData }) => {
 												</div>
 											)}
 
-											{/* Media soni */}
-											{(mediaCounts.images + mediaCounts.videos) > 1 && (
-												<div className="absolute bottom-4 right-4">
-													<span className="bg-black bg-opacity-50 text-white px-2 py-1 rounded-full text-xs">
-														+{(mediaCounts.images + mediaCounts.videos) - 1}
-													</span>
-												</div>
-											)}
-
 											{/* Play icon for videos */}
 											{mediaType === 'video' && (
 												<div className="absolute inset-0 flex items-center justify-center">
@@ -414,41 +417,25 @@ const AllNews = ({ pageData }) => {
 											<div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
 										</div>
 
-										{/* Kontent qismi */}
+										{/* Kontent qismi - FAQAT TITLE */}
 										<div className="p-6">
 											{/* Sana va ko'rishlar */}
-											<div className="flex items-center justify-between mb-3">
+											<div className="flex items-center justify-between mb-4">
 												<div className="flex items-center gap-2 text-gray-500 text-sm">
 													<Calendar size={16} />
 													<span>{formatDate(item.createdAt)}</span>
 												</div>
 												<div className="flex items-center gap-1 text-gray-500 text-sm">
-													<Eye size={16} />
-													<span>{item.views}</span>
+												
 												</div>
 											</div>
 
-											{/* Sarlavha */}
-											<h2 className="text-xl font-bold text-gray-800 mb-3 line-clamp-2 group-hover:text-blue-600 transition-colors">
+											{/* Sarlavha - kattaroq va markazda */}
+											<h2 className="text-xl font-bold text-gray-800 text-center group-hover:text-blue-600 transition-colors leading-tight min-h-[60px] flex items-center justify-center">
 												{item.title}
 											</h2>
 
-											{/* Tavsif */}
-											<p className="text-gray-600 mb-4 line-clamp-3">
-												{item.description}
-											</p>
-
-											{/* Media statistikasi */}
-											{(mediaCounts.images > 0 || mediaCounts.videos > 0) && (
-												<div className="flex items-center gap-4 text-xs text-gray-500">
-													{mediaCounts.images > 0 && (
-														<span>{mediaCounts.images} {t.photos}</span>
-													)}
-													{mediaCounts.videos > 0 && (
-														<span>{mediaCounts.videos} {t.videos}</span>
-													)}
-												</div>
-											)}
+										
 										</div>
 									</div>
 								)
@@ -461,7 +448,7 @@ const AllNews = ({ pageData }) => {
 				<Footer />
 			</div>
 
-			{/* 🔹 Yangilik Modal */}
+			{/* 🔹 Yangilik Modal - TITLE VA DESCRIPTION KO'RSATILADI */}
 			{selectedNews && (
 				<div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4">
 					<div className="relative w-full max-w-6xl max-h-[95vh] bg-white rounded-2xl shadow-2xl overflow-hidden flex flex-col">
@@ -477,17 +464,12 @@ const AllNews = ({ pageData }) => {
 						<div className="flex-1 overflow-y-auto">
 							{/* Sarlavha */}
 							<div className="text-black p-8 pb-4">
-								<h1 className="text-3xl md:text-4xl font-bold text-center mb-4">
+								<h1 className="text-3xl md:text-4xl font-bold text-center mb-4 text-gray-900">
 									{selectedNews.title}
 								</h1>
 								<div className="flex justify-center items-center gap-8 text-gray-600 text-lg">
 									<div className="flex items-center gap-2">
-										<Calendar size={20} />
 										<span>{formatDate(selectedNews.createdAt)}</span>
-									</div>
-									<div className="flex items-center gap-2">
-										<Eye size={20} />
-										<span>{selectedNews.views} {t.views}</span>
 									</div>
 								</div>
 							</div>
@@ -509,18 +491,61 @@ const AllNews = ({ pageData }) => {
 								</div>
 							)}
 
-							{/* Tavsif */}
+							{/* Tavsif - HTML CONTENT NI KO'RSATISH */}
 							<div className="p-8 pt-6">
-								<div className="prose prose-lg max-w-none">
-									<p className="text-gray-700 text-xl leading-relaxed text-justify">
-										{selectedNews.description}
-									</p>
-								</div>
+								<div
+									className="prose prose-lg max-w-none text-gray-900"
+									dangerouslySetInnerHTML={{ __html: selectedNews.description }}
+									style={{
+										color: '#000000'
+									}}
+								/>
 							</div>
 						</div>
 					</div>
 				</div>
 			)}
+
+			{/* Global CSS for HTML content */}
+			<style jsx global>{`
+				/* Modal ichidagi HTML content uchun */
+				.prose {
+					color: #000000 !important;
+				}
+				
+				.prose p {
+					color: #000000 !important;
+				}
+				
+				.prose strong {
+					color: #000000 !important;
+				}
+				
+				.prose em {
+					color: #000000 !important;
+				}
+				
+				.prose a {
+					color: #2563eb !important;
+				}
+				
+				.prose a:hover {
+					color: #1d4ed8 !important;
+				}
+				
+				.prose ul, .prose ol {
+					color: #000000 !important;
+				}
+				
+				.prose li {
+					color: #000000 !important;
+				}
+				
+				.prose blockquote {
+					color: #000000 !important;
+					border-left-color: #3b82f6;
+				}
+			`}</style>
 		</>
 	)
 }

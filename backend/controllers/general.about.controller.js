@@ -3,6 +3,9 @@ const GeneralAboutService = require('../services/general.about.service')
 class GeneralAboutController {
 	async create(req, res) {
 		try {
+			console.log("req.body")
+			console.log(req.body)
+			console.log("req.body")
 			const result = await GeneralAboutService.create(req.body)
 			if (result.success) {
 				return res.status(201).json(result)

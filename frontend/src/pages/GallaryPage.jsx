@@ -337,130 +337,6 @@ const GallaryPage = ({ pageData }) => {
 
 	return (
 		<div className="min-h-screen flex flex-col bg-gradient-to-br from-slate-50 to-blue-50">
-			{/* Media Modal */}
-			{selectedMedia && currentGallery && (
-				<div className="fixed inset-0 bg-black/90 z-50 flex items-center justify-center p-4">
-					<div className="relative max-w-6xl max-h-full w-full">
-						{/* Close button */}
-						<button
-							onClick={closeModal}
-							className="absolute top-4 right-4 z-10 text-white hover:text-gray-300 transition-colors bg-black/50 rounded-full p-2"
-						>
-							<svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-								<path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-							</svg>
-						</button>
-
-						{/* Navigation arrows */}
-						{currentGallery.photos.length > 1 && (
-							<>
-								<button
-									onClick={prevMedia}
-									className="absolute left-4 top-1/2 transform -translate-y-1/2 z-10 text-white hover:text-gray-300 transition-colors bg-black/50 rounded-full p-3"
-								>
-									<svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-										<path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-									</svg>
-								</button>
-								<button
-									onClick={nextMedia}
-									className="absolute right-4 top-1/2 transform -translate-y-1/2 z-10 text-white hover:text-gray-300 transition-colors bg-black/50 rounded-full p-3"
-								>
-									<svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-										<path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-									</svg>
-								</button>
-							</>
-						)}
-
-						{/* Gallery title */}
-						<div className="absolute top-4 left-4 z-10 text-white">
-							<h3 className="text-lg font-semibold bg-black/50 px-3 py-1 rounded-lg">
-								{currentGallery.title}
-							</h3>
-						</div>
-
-						{/* Main media content */}
-						<div className="flex flex-col items-center pt-12">
-							{selectedMedia.type === 'video' ? (
-								<video
-									controls
-									autoPlay
-									className="max-w-full max-h-[70vh] rounded-lg"
-									key={selectedMedia.url}
-								>
-									<source src={selectedMedia.url} type="video/mp4" />
-									Your browser does not support the video tag.
-								</video>
-							) : (
-								<img
-									src={selectedMedia.url}
-									alt={`${currentGallery.title} - ${currentMediaIndex + 1}`}
-									className="max-w-full max-h-[70vh] object-contain rounded-lg"
-									key={selectedMedia.url}
-									onError={(e) => {
-										e.target.src = "https://via.placeholder.com/800x500/3B82F6/FFFFFF?text=Rasm+Yuklanmadi"
-									}}
-								/>
-							)}
-
-							{/* Media counter */}
-							<div className="mt-4 text-white text-center">
-								<span className="bg-black/50 px-3 py-1 rounded-full text-sm">
-									{currentMediaIndex + 1} {t.of} {currentGallery.photos.length}
-								</span>
-							</div>
-
-							{/* Thumbnail navigation */}
-							{currentGallery.photos.length > 1 && (
-								<div className="mt-4 flex gap-2 overflow-x-auto max-w-full pb-2">
-									{currentGallery.photos.map((photo, index) => {
-										const mediaType = getMediaType(photo)
-										const isVideo = mediaType === 'video'
-										const thumbUrl = getMediaUrl(photo)
-
-										return (
-											<button
-												key={index}
-												onClick={() => {
-													setCurrentMediaIndex(index)
-													setSelectedMedia({
-														url: thumbUrl,
-														type: mediaType
-													})
-												}}
-												className={`flex-shrink-0 w-16 h-16 rounded-lg overflow-hidden border-2 transition-all ${index === currentMediaIndex ? 'border-blue-500' : 'border-transparent'
-													}`}
-											>
-												{isVideo ? (
-													<div className="relative w-full h-full bg-gray-800">
-														<svg className="w-6 h-6 text-white absolute inset-0 m-auto" fill="currentColor" viewBox="0 0 24 24">
-															<path d="M8 5v14l11-7z" />
-														</svg>
-														<div className="absolute bottom-0 right-0 bg-red-500 text-white text-xs px-1">
-															VID
-														</div>
-													</div>
-												) : (
-													<img
-														src={thumbUrl}
-														alt={`Thumbnail ${index + 1}`}
-														className="w-full h-full object-cover"
-														onError={(e) => {
-															e.target.src = "https://via.placeholder.com/100x100/3B82F6/FFFFFF?text=Error"
-														}}
-													/>
-												)}
-											</button>
-										)
-									})}
-								</div>
-							)}
-						</div>
-					</div>
-				</div>
-			)}
-
 			{/* Navbar */}
 			<Navbar />
 
@@ -560,6 +436,136 @@ const GallaryPage = ({ pageData }) => {
 
 			{/* Footer */}
 			<Footer />
+
+			{/* Media Modal - navbar ustida bo'lishi uchun alohida qism */}
+			{selectedMedia && currentGallery && (
+				<div className="fixed inset-0 bg-black/95 z-[9999] flex items-center justify-center p-4">
+					<div className="relative max-w-6xl max-h-full w-full">
+						{/* Close button - eng yuqori z-index */}
+						<button
+							onClick={closeModal}
+							className="absolute -top-14 right-0 z-[10000] text-white hover:text-gray-300 transition-colors bg-black/80 hover:bg-black rounded-full p-3 shadow-2xl"
+						>
+							<svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+								<path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+							</svg>
+						</button>
+
+						{/* Navigation arrows - yuqori z-index */}
+						{currentGallery.photos.length > 1 && (
+							<>
+								<button
+									onClick={prevMedia}
+									className="absolute left-0 top-1/2 transform -translate-y-1/2 z-[10000] text-white hover:text-gray-300 transition-colors bg-black/80 hover:bg-black rounded-full p-3 shadow-2xl"
+								>
+									<svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+										<path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+									</svg>
+								</button>
+								<button
+									onClick={nextMedia}
+									className="absolute right-0 top-1/2 transform -translate-y-1/2 z-[10000] text-white hover:text-gray-300 transition-colors bg-black/80 hover:bg-black rounded-full p-3 shadow-2xl"
+								>
+									<svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+										<path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+									</svg>
+								</button>
+							</>
+						)}
+
+						{/* Gallery title - yuqori z-index */}
+						<div className="absolute -top-12 left-0 z-[10000] text-white max-w-xl">
+							<h3 className="text-xl font-bold bg-black/80 px-4 py-2 rounded-lg shadow-2xl">
+								{currentGallery.title}
+							</h3>
+						</div>
+
+						{/* Main media content */}
+						<div className="flex flex-col items-center">
+							{selectedMedia.type === 'video' ? (
+								<div className="w-full max-w-4xl">
+									<video
+										controls
+										autoPlay
+										className="w-full h-auto max-h-[75vh] rounded-lg shadow-2xl"
+										key={selectedMedia.url}
+									>
+										<source src={selectedMedia.url} type="video/mp4" />
+										Your browser does not support the video tag.
+									</video>
+								</div>
+							) : (
+								<div className="w-full max-w-4xl">
+									<img
+										src={selectedMedia.url}
+										alt={`${currentGallery.title} - ${currentMediaIndex + 1}`}
+										className="w-full h-auto max-h-[75vh] object-contain rounded-lg shadow-2xl"
+										key={selectedMedia.url}
+										onError={(e) => {
+											e.target.src = "https://via.placeholder.com/800x500/3B82F6/FFFFFF?text=Rasm+Yuklanmadi"
+										}}
+									/>
+								</div>
+							)}
+
+							{/* Media counter */}
+							<div className="mt-4 text-white text-center z-[10000]">
+								<span className="bg-black/80 px-4 py-2 rounded-full text-base font-medium shadow-2xl">
+									{currentMediaIndex + 1} {t.of} {currentGallery.photos.length}
+								</span>
+							</div>
+
+							{/* Thumbnail navigation */}
+							{currentGallery.photos.length > 1 && (
+								<div className="mt-6 flex gap-3 overflow-x-auto max-w-4xl pb-4">
+									{currentGallery.photos.map((photo, index) => {
+										const mediaType = getMediaType(photo)
+										const isVideo = mediaType === 'video'
+										const thumbUrl = getMediaUrl(photo)
+
+										return (
+											<button
+												key={index}
+												onClick={() => {
+													setCurrentMediaIndex(index)
+													setSelectedMedia({
+														url: thumbUrl,
+														type: mediaType
+													})
+												}}
+												className={`flex-shrink-0 w-24 h-24 rounded-lg overflow-hidden border-4 transition-all shadow-lg ${index === currentMediaIndex
+													? 'border-blue-500 ring-4 ring-blue-400'
+													: 'border-transparent hover:border-gray-500'
+													}`}
+											>
+												{isVideo ? (
+													<div className="relative w-full h-full bg-gray-900">
+														<svg className="w-10 h-10 text-white absolute inset-0 m-auto" fill="currentColor" viewBox="0 0 24 24">
+															<path d="M8 5v14l11-7z" />
+														</svg>
+														<div className="absolute bottom-0 right-0 bg-red-600 text-white text-xs px-2 py-1">
+															VID
+														</div>
+													</div>
+												) : (
+													<img
+														src={thumbUrl}
+														alt={`Thumbnail ${index + 1}`}
+														className="w-full h-full object-cover hover:scale-110 transition-transform duration-200"
+														onError={(e) => {
+															e.target.src = "https://via.placeholder.com/100x100/3B82F6/FFFFFF?text=Error"
+														}}
+													/>
+												)}
+											</button>
+										)
+									})}
+								</div>
+							)}
+						</div>
+					</div>
+				</div>
+			)}
 		</div>
 	)
 }

@@ -1,15 +1,9 @@
-const GeneralNewsService = require('../services/general.news.service')
+const GeneralCommunicationService = require('../services/general.communication.service')
 
-class GeneralNewsController {
+class GeneralCommunicationController {
 	async create(req, res) {
 		try {
-			console.log(req.body)
-			const photos = req.files ? req.files.map(file => `/uploads/${file.filename}`) : []
-			const data = {
-				...req.body,
-				photos
-			}
-			const result = await GeneralNewsService.create(data)
+			const result = await GeneralCommunicationService.create(req.body)
 			if (result.success) {
 				return res.status(201).json(result)
 			} else {
@@ -22,13 +16,7 @@ class GeneralNewsController {
 	}
 	async update(req, res) {
 		try {
-			console.log(req.body)
-			const photos = req.files ? req.files.map(file => `/uploads/${file.filename}`) : []
-			const data = {
-				...req.body,
-				photos
-			}
-			const result = await GeneralNewsService.update(req.params.id, data)
+			const result = await GeneralCommunicationService.update(req.params.id, req.body)
 			if (result.success) {
 				return res.status(200).json(result)
 			} else {
@@ -41,7 +29,7 @@ class GeneralNewsController {
 	}
 	async deleted(req, res) {
 		try {
-			const result = await GeneralNewsService.deleted(req.params.id)
+			const result = await GeneralCommunicationService.deleted(req.params.id)
 			if (result.success) {
 				return res.status(200).json(result)
 			} else {
@@ -54,7 +42,7 @@ class GeneralNewsController {
 	}
 	async getAlll(req, res) {
 		try {
-			const result = await GeneralNewsService.getAlll(req.params.key)
+			const result = await GeneralCommunicationService.getAlll(req.params.key)
 			if (result.success) {
 				return res.status(200).json(result)
 			} else {
@@ -69,22 +57,7 @@ class GeneralNewsController {
 	}
 	async getAll(req, res) {
 		try {
-			const result = await GeneralNewsService.getAll(req.params.key, req.params.lang)
-			if (result.success) {
-				return res.status(200).json(result)
-			} else {
-				return res.status(400).json(result)
-			}
-		} catch (error) {
-			console.log(error)
-			return res.status(500).json({
-				success: false, message: "Server xatosi"
-			})
-		}
-	}
-	async getOne(req, res) {
-		try {
-			const result = await GeneralNewsService.getAll(req.params.key, req.params.lang)
+			const result = await GeneralCommunicationService.getAll(req.params.key, req.params.lang)
 			if (result.success) {
 				return res.status(200).json(result)
 			} else {
@@ -98,4 +71,4 @@ class GeneralNewsController {
 		}
 	}
 }
-module.exports = new GeneralNewsController()
+module.exports = new GeneralCommunicationController()

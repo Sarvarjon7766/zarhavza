@@ -11,12 +11,15 @@ const newsSchema = new Schema({
 	},
 	description_uz: {
 		type: String,
+		
 	},
 	description_ru: {
 		type: String,
+		
 	},
 	description_en: {
 		type: String,
+	
 	},
 	key: {
 		type: String,

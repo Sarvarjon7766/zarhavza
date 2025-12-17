@@ -280,13 +280,6 @@ const Statistics = () => {
 									{/* Gradient overlay */}
 									<div className={`absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-80`}></div>
 
-									{/* Icon va category */}
-									<div className="absolute top-4 left-4">
-										<div className={`p-2 rounded-xl bg-white/90 backdrop-blur-sm ${colors.text}`}>
-											<IconComponent size={20} />
-										</div>
-									</div>
-
 									{/* Sarlavha rasm ustida */}
 									<div className="absolute bottom-4 left-4 right-4">
 										<h3 className="text-xl font-bold text-white mb-2">
@@ -327,20 +320,19 @@ const Statistics = () => {
 						)
 					})}
 				</div>
-
-				{/* Bottom decorative element */}
-				<div className="text-center mt-12">
-					<div className="inline-flex items-center gap-4 bg-white/80 backdrop-blur-sm rounded-2xl px-8 py-4 border-2 border-gray-200 shadow-lg">
-						<div className="flex space-x-1">
-							<div className="w-2 h-2 bg-green-400 rounded-full animate-bounce"></div>
-							<div className="w-2 h-2 bg-blue-400 rounded-full animate-bounce" style={{ animationDelay: '0.1s' }}></div>
-							<div className="w-2 h-2 bg-purple-400 rounded-full animate-bounce" style={{ animationDelay: '0.2s' }}></div>
+					{/* Bottom decorative element */}
+					<div className="text-center mt-12">
+						<div className="inline-flex items-center gap-4 bg-white/80 backdrop-blur-sm rounded-2xl px-8 py-4 border-2 border-gray-200 shadow-lg">
+							<div className="flex space-x-1">
+								<div className="w-2 h-2 bg-green-400 rounded-full animate-bounce"></div>
+								<div className="w-2 h-2 bg-blue-400 rounded-full animate-bounce" style={{ animationDelay: '0.1s' }}></div>
+								<div className="w-2 h-2 bg-purple-400 rounded-full animate-bounce" style={{ animationDelay: '0.2s' }}></div>
+							</div>
+							<span className="text-sm font-medium text-gray-600">
+								{t.title} - {new Date().getFullYear()}
+							</span>
 						</div>
-						<span className="text-sm font-medium text-gray-600">
-							{t.title} - {new Date().getFullYear()}
-						</span>
 					</div>
-				</div>
 			</div>
 		</section>
 	)

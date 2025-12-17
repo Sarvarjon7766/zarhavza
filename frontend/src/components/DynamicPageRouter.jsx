@@ -2,13 +2,14 @@
 import axios from 'axios'
 import { useEffect, useState } from 'react'
 import { useLocation } from 'react-router-dom'
+import ComunicationPage from '../pages/ComunicationPage'
 import DocumentsPage from '../pages/DocumentsPage'
 import GalleryPage from '../pages/GallaryPage'
+import LeaderPage from '../pages/LeaderPage'
 import NewsPage from '../pages/NewsPage'
 import NotFound from '../pages/notfound/NotFound'
 import StaticPage from '../pages/StaticPage'
 import LoadingSpinner from './LoadingSpinner'
-
 const BASE_URL = import.meta.env.VITE_BASE_URL
 
 const DynamicPageRouter = () => {
@@ -115,6 +116,10 @@ const DynamicPageRouter = () => {
 				return <GalleryPage pageData={pageData} />
 			case 'documents':
 				return <DocumentsPage pageData={pageData} />
+			case 'leader':
+				return <LeaderPage pageData={pageData} />
+			case 'communication':
+				return <ComunicationPage pageData={pageData} />
 			default:
 				console.log('⚠️ Unknown page type, defaulting to StaticPage')
 				return <StaticPage pageData={pageData} />

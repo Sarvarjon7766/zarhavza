@@ -100,23 +100,6 @@ const Sitebar = ({ isOpen, onClose }) => {
 						)}
 					</div>
 
-					{/* Axborot xizmati */}
-					<div>
-						<button
-							onClick={() => toggleMenu("info")}
-							className="flex justify-between items-center w-full text-left p-2 rounded hover:bg-gray-700"
-						>
-							<span>📰 Axborot xizmati</span>
-							{openMenu === "info" ? <ChevronDown size={18} /> : <ChevronRight size={18} />}
-						</button>
-						{openMenu === "info" && (
-							<div className="ml-4 mt-1 space-y-1">
-								<Link to="/admin/announcements" className={`block p-2 rounded hover:bg-gray-700 ${isActive("/admin/announcements") ? "bg-blue-600" : ""}`}>📢 E'lonlar</Link>
-								<Link to="/admin/gallery" className={`block p-2 rounded hover:bg-gray-700 ${isActive("/admin/gallery") ? "bg-blue-600" : ""}`}>🖼️ Galareya</Link>
-							</div>
-						)}
-					</div>
-
 				</nav>
 			</aside>
 		</>

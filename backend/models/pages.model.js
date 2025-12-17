@@ -17,7 +17,7 @@ const PageSchema = new Schema(
 
 		type: {
 			type: String,
-			enum: ["static", "news", "gallery", "documents"],
+			enum: ["static", "news", "gallery", "documents",'leader','communication'],
 			default: "static",
 		},
 

@@ -7,15 +7,14 @@ const Navbar = () => {
 	const [openMenu, setOpenMenu] = useState(null)
 	const [mobileOpen, setMobileOpen] = useState(false)
 	const [language, setLanguage] = useState("uz")
-	const [searchOpen, setSearchOpen] = useState(false)
 	const [isScrolled, setIsScrolled] = useState(false)
 	const [showAccessibilityModal, setShowAccessibilityModal] = useState(false)
 	const [accessibilitySettings, setAccessibilitySettings] = useState({
 		fontSize: 100,
 		theme: 'normal'
 	})
-	const [menuItems, setMenuItems] = useState([]) // API dan kelgan menyu
-	const [socialNetworks, setSocialNetworks] = useState([]) // API dan kelgan ijtimoiy tarmoqlar
+	const [menuItems, setMenuItems] = useState([])
+	const [socialNetworks, setSocialNetworks] = useState([])
 	const navigate = useNavigate()
 
 	const BASE_URL = import.meta.env.VITE_BASE_URL
@@ -23,12 +22,7 @@ const Navbar = () => {
 	// Scroll holatini kuzatish
 	useEffect(() => {
 		const handleScroll = () => {
-			const scrollTop = window.scrollY
-			if (scrollTop > 50) {
-				setIsScrolled(true)
-			} else {
-				setIsScrolled(false)
-			}
+			setIsScrolled(window.scrollY > 20)
 		}
 
 		window.addEventListener('scroll', handleScroll)
@@ -49,10 +43,7 @@ const Navbar = () => {
 	useEffect(() => {
 		const fetchMenu = async () => {
 			try {
-				console.log("🔄 Fetching menu for language:", language)
 				const { data } = await axios.get(`${BASE_URL}/api/pages/getAll/${language}`)
-				console.log("📋 Menu data received:", data)
-
 				if (data.success) {
 					setMenuItems(data.data)
 				}
@@ -68,10 +59,7 @@ const Navbar = () => {
 	useEffect(() => {
 		const fetchSocialNetworks = async () => {
 			try {
-				console.log("🔄 Fetching social networks...")
 				const { data } = await axios.get(`${BASE_URL}/api/social-networks/getAll`)
-				console.log("📱 Social networks data received:", data)
-
 				if (data.success) {
 					setSocialNetworks(data.data)
 				}
@@ -96,68 +84,24 @@ const Navbar = () => {
 	// Accessibility sozlamalarini qo'llash
 	const applyAccessibilitySettings = (settings) => {
 		const root = document.documentElement
-
-		// Shrift o'lchami
 		root.style.fontSize = `${settings.fontSize}%`
 
-		// Mavzu
 		if (settings.theme === 'grayscale') {
-			root.style.setProperty('--bg-color', '#ffffff')
-			root.style.setProperty('--text-color', '#000000')
-			root.style.setProperty('--primary-color', '#666666')
-			root.style.setProperty('--secondary-color', '#333333')
 			root.style.filter = 'grayscale(100%)'
 		} else {
-			// Normal holat
-			root.style.setProperty('--bg-color', '')
-			root.style.setProperty('--text-color', '')
-			root.style.setProperty('--primary-color', '')
-			root.style.setProperty('--secondary-color', '')
 			root.style.filter = 'none'
 		}
 	}
-
-	// Scroll ni boshqarish
-	const toggleBodyScroll = (disable) => {
-		if (disable) {
-			document.body.style.overflow = 'hidden'
-		} else {
-			document.body.style.overflow = 'auto'
-		}
-	}
-
-	// Til o'zgarganda yangilash
-	useEffect(() => {
-		const handleStorageChange = () => {
-			const savedLang = localStorage.getItem("lang") || "uz"
-			setLanguage(savedLang)
-		}
-
-		window.addEventListener('storage', handleStorageChange)
-		const interval = setInterval(() => {
-			const savedLang = localStorage.getItem("lang") || "uz"
-			if (savedLang !== language) {
-				setLanguage(savedLang)
-			}
-		}, 1000)
-
-		return () => {
-			window.removeEventListener('storage', handleStorageChange)
-			clearInterval(interval)
-		}
-	}, [language])
 
 	// Tilni o'zgartirish
 	const handleLanguageChange = (langCode) => {
 		setLanguage(langCode)
 		localStorage.setItem("lang", langCode)
-		// Til o'zgarganda menyuni qayta yuklash
 		window.dispatchEvent(new Event('languageChanged'))
 	}
 
 	// Navigate funksiyasi
 	const handleNavigate = (slug) => {
-		console.log("📍 Navigate to slug:", slug)
 		navigate(slug)
 		setMobileOpen(false)
 		setOpenMenu(null)
@@ -175,13 +119,13 @@ const Navbar = () => {
 	// Maxsus Imkoniyatlar modalini ochish
 	const handleAccessibilityClick = () => {
 		setShowAccessibilityModal(true)
-		toggleBodyScroll(true)
+		document.body.style.overflow = 'hidden'
 	}
 
 	// Modalni yopish
 	const handleCloseModal = () => {
 		setShowAccessibilityModal(false)
-		toggleBodyScroll(false)
+		document.body.style.overflow = 'auto'
 	}
 
 	// Shrift o'lchamini o'zgartirish
@@ -211,7 +155,7 @@ const Navbar = () => {
 		applyAccessibilitySettings(defaultSettings)
 	}
 
-	// Menu itemlar uchun hover va click handlerlar
+	// Menu itemlar uchun hover handlerlar
 	const handleMouseEnter = (id) => setOpenMenu(id)
 	const handleMouseLeave = () => setOpenMenu(null)
 
@@ -223,35 +167,17 @@ const Navbar = () => {
 	const getSocialIcon = (key) => {
 		switch (key) {
 			case 'facebook':
-				return <Facebook size={18} className="sm:w-5 sm:h-5 group-hover:scale-110" />
+				return <Facebook size={16} className="sm:w-4 sm:h-4 lg:w-5 lg:h-5 group-hover:scale-110 transition-transform" />
 			case 'telegram':
-				return <Send size={18} className="sm:w-5 sm:h-5 group-hover:scale-110" />
+				return <Send size={16} className="sm:w-4 sm:h-4 lg:w-5 lg:h-5 group-hover:scale-110 transition-transform" />
 			case 'youtube':
-				return <Youtube size={18} className="sm:w-5 sm:h-5 group-hover:scale-110" />
+				return <Youtube size={16} className="sm:w-4 sm:h-4 lg:w-5 lg:h-5 group-hover:scale-110 transition-transform" />
 			case 'instagram':
-				return <Instagram size={18} className="sm:w-5 sm:h-5 group-hover:scale-110" />
+				return <Instagram size={16} className="sm:w-4 sm:h-4 lg:w-5 lg:h-5 group-hover:scale-110 transition-transform" />
 			case 'location':
-				return <MapPin size={18} className="sm:w-5 sm:h-5 group-hover:scale-110" />
+				return <MapPin size={16} className="sm:w-4 sm:h-4 lg:w-5 lg:h-5 group-hover:scale-110 transition-transform" />
 			default:
 				return null
-		}
-	}
-
-	// Ijtimoiy tarmoq nomlarini olish
-	const getSocialTitle = (key) => {
-		switch (key) {
-			case 'facebook':
-				return "Facebook"
-			case 'telegram':
-				return "Telegram"
-			case 'youtube':
-				return "YouTube"
-			case 'instagram':
-				return "Instagram"
-			case 'location':
-				return "Lokatsiya"
-			default:
-				return "Ijtimoiy tarmoq"
 		}
 	}
 
@@ -263,8 +189,8 @@ const Navbar = () => {
 				href={social.link}
 				target="_blank"
 				rel="noopener noreferrer"
-				className="text-white hover:text-yellow-300 transition-all duration-300 p-1.5 sm:p-2 rounded-lg group"
-				title={getSocialTitle(social.key)}
+				className="text-white hover:text-yellow-300 hover:bg-blue-700/50 transition-all duration-300 p-1.5 sm:p-2 rounded-lg group"
+				title={social.key}
 			>
 				{getSocialIcon(social.key)}
 			</a>
@@ -277,8 +203,7 @@ const Navbar = () => {
 			home: "Bosh sahifa",
 			contact: "Bog'lanish",
 			samarkandRegion: "Samarqand viloyati",
-			zarafshonIrrigation: '"Zarafshon" irrigatsiya tizimi',
-			directorate: "Boshqarma",
+			zarafshonIrrigation: 'Zarafshon irrigatsiya tizimlari havza boshqarmasi',
 			accessibility: "Maxsus Imkoniyatlar",
 			fontSize: "Shrift o'lchami",
 			theme: "Mavzu",
@@ -287,16 +212,13 @@ const Navbar = () => {
 			reset: "Barchasini tiklash",
 			close: "Yopish",
 			accessibilitySettings: "Qulaylik sozlamalari",
-			customizeSite: "Saytni o'zingizga qulay tarzda sozlang",
-			current: "Joriy",
-			percent: "%"
+			customizeSite: "Saytni o'zingizga qulay tarzda sozlang"
 		},
 		ru: {
 			home: "Главная",
 			contact: "Связь",
 			samarkandRegion: "Самаркандская область",
-			zarafshonIrrigation: 'Ирригационная система "Зарафшан"',
-			directorate: "Управление",
+			zarafshonIrrigation: 'Зарафшанское управление бассейна ирригационных систем',
 			accessibility: "Специальные Возможности",
 			fontSize: "Размер шрифта",
 			theme: "Тема",
@@ -305,16 +227,13 @@ const Navbar = () => {
 			reset: "Сбросить все",
 			close: "Закрыть",
 			accessibilitySettings: "Настройки доступности",
-			customizeSite: "Настройте сайт под себя",
-			current: "Текущий",
-			percent: "%"
+			customizeSite: "Настройте сайт под себя"
 		},
 		en: {
 			home: "Home",
 			contact: "Contact",
 			samarkandRegion: "Samarkand region",
-			zarafshonIrrigation: '"Zarafshon" irrigation system',
-			directorate: "Directorate",
+			zarafshonIrrigation: 'Zarafshan Basin Irrigation Systems Authority',
 			accessibility: "Special Features",
 			fontSize: "Font Size",
 			theme: "Theme",
@@ -323,9 +242,7 @@ const Navbar = () => {
 			reset: "Reset All",
 			close: "Close",
 			accessibilitySettings: "Accessibility Settings",
-			customizeSite: "Customize the site to your preferences",
-			current: "Current",
-			percent: "%"
+			customizeSite: "Customize the site to your preferences"
 		}
 	}
 
@@ -333,13 +250,15 @@ const Navbar = () => {
 
 	// Menu itemlarni render qilish (Desktop)
 	const renderDesktopMenu = () => (
-		<ul className="flex items-center space-x-0 xl:space-x-1 font-semibold text-xs md:text-sm lg:text-base xl:text-lg">
-			{/* Bosh sahifa - har doim birinchi */}
+		<ul className="flex items-center  justify-center space-x-1 lg:space-x-2 xl:space-x-3 font-medium">
+			{/* Bosh sahifa */}
 			<li
 				onClick={() => handleNavigate("/")}
-				className="text-white hover:text-yellow-300 hover:bg-blue-700/50 transition-all duration-300 py-3 lg:py-4 px-2 md:px-3 lg:px-4 xl:px-6 cursor-pointer rounded-lg group"
+				className="text-white hover:text-yellow-300 hover:bg-blue-700/50 transition-all duration-300 py-2.5 px-3 lg:px-4 cursor-pointer rounded-lg group"
 			>
-				<span className="group-hover:scale-105 transition-transform block whitespace-nowrap">{t.home}</span>
+				<span className="text-sm lg:text-base font-semibold group-hover:scale-105 transition-transform whitespace-nowrap">
+					{t.home}
+				</span>
 			</li>
 
 			{/* API dan kelgan menyu itemlari */}
@@ -352,39 +271,34 @@ const Navbar = () => {
 				>
 					<button
 						onClick={() => {
-							console.log("🖱️ Clicked menu item:", item.title, "slug:", item.slug)
 							if (item.children.length === 0) {
 								handleNavigate(item.slug)
 							}
 						}}
-						className="flex items-center gap-1 lg:gap-2 text-white hover:text-yellow-300 hover:bg-blue-700/50 py-3 lg:py-4 px-2 md:px-3 lg:px-4 xl:px-6 cursor-pointer rounded-lg transition-all duration-300 group whitespace-nowrap"
+						className="flex items-center gap-1 text-white hover:text-yellow-300 hover:bg-blue-700/50 py-2.5 px-3 lg:px-4 cursor-pointer rounded-lg transition-all duration-300 whitespace-nowrap group"
 					>
-						<span className="group-hover:scale-105 transition-transform text-xs md:text-sm lg:text-base xl:text-lg">
+						<span className="text-sm lg:text-base font-semibold group-hover:scale-105 transition-transform">
 							{item.title}
 						</span>
 						{item.children.length > 0 && (
 							<ChevronDown
 								size={14}
-								className={`transition-transform duration-300 ${openMenu === item._id ? "rotate-180 text-yellow-300" : "group-hover:scale-110"} w-3 h-3 md:w-4 md:h-4 lg:w-4 lg:h-4`}
+								className={`transition-transform duration-300 ${openMenu === item._id ? "rotate-180 text-yellow-300" : "group-hover:text-yellow-300"}`}
 							/>
 						)}
 					</button>
 
 					{/* Dropdown menu */}
 					{item.children.length > 0 && openMenu === item._id && (
-						<div className="absolute left-0 top-full bg-white border border-gray-300 rounded-xl w-44 md:w-48 lg:w-52 xl:w-56 z-50 overflow-hidden shadow-md">
-							<ul className="p-2 space-y-1">
+						<div className="absolute left-1/2 transform -translate-x-1/2 top-full bg-white w-44 lg:w-48 xl:w-52 z-50 overflow-hidden mt-1 border border-gray-200 shadow-lg">
+							<ul className="py-1">
 								{item.children.map((child) => (
 									<li
 										key={child._id}
-										onClick={() => {
-											console.log("🖱️ Clicked child menu:", child.title, "slug:", child.slug)
-											handleNavigate(child.slug)
-										}}
-										className="flex items-center space-x-2 lg:space-x-3 hover:bg-gray-200 rounded-lg px-2 lg:px-3 py-2 lg:py-3 text-black cursor-pointer transition-all duration-200 group"
+										onClick={() => handleNavigate(child.slug)}
+										className="hover:bg-blue-50 px-4 py-2.5 text-gray-800 cursor-pointer transition-all duration-200 group"
 									>
-										{child.icon && <span className="text-base lg:text-lg">{child.icon}</span>}
-										<span className="font-medium group-hover:text-blue-600 group-hover:translate-x-1 transition-transform text-xs md:text-sm lg:text-base">
+										<span className="text-sm font-medium group-hover:text-blue-600 group-hover:translate-x-1 transition-transform inline-block">
 											{child.title}
 										</span>
 									</li>
@@ -395,26 +309,27 @@ const Navbar = () => {
 				</li>
 			))}
 
-			{/* Bog'lanish - har doim oxirgi */}
+			{/* Bog'lanish */}
 			<li
 				onClick={() => handleNavigate("/contact")}
-				className="text-white hover:text-yellow-300 hover:bg-blue-700/50 transition-all duration-300 py-3 lg:py-4 px-2 md:px-3 lg:px-4 xl:px-6 cursor-pointer rounded-lg group"
+				className="text-white hover:text-yellow-300 hover:bg-blue-700/50 transition-all duration-300 py-2.5 px-3 lg:px-4 cursor-pointer rounded-lg group"
 			>
-				<span className="group-hover:scale-105 transition-transform block whitespace-nowrap">{t.contact}</span>
+				<span className="text-sm lg:text-base font-semibold group-hover:scale-105 transition-transform whitespace-nowrap">
+					{t.contact}
+				</span>
 			</li>
 		</ul>
 	)
 
 	// Menu itemlarni render qilish (Mobile)
 	const renderMobileMenu = () => (
-		<div className="px-3 py-3 space-y-0.5">
-			{/* Bosh sahifa - har doim birinchi */}
+		<div className={`px-4 py-3  space-y-1 ${isScrolled ? 'bg-blue-600' : 'bg-white border-t border-gray-200'} max-h-[70vh] overflow-y-auto`}>
+			{/* Bosh sahifa */}
 			<div
 				onClick={() => handleNavigate("/")}
-				className="flex items-center space-x-3 py-2.5 px-3 text-white hover:text-yellow-300 hover:bg-blue-700/50 rounded-lg cursor-pointer text-sm transition-all duration-200 group"
+				className={`py-3 px-4 ${isScrolled ? 'text-white hover:text-yellow-300 hover:bg-blue-700/50' : 'text-gray-800 hover:text-blue-600 hover:bg-gray-100'} rounded-lg cursor-pointer transition-all duration-200 group`}
 			>
-				<span className="text-lg">🏠</span>
-				<span className="group-hover:translate-x-1 transition-transform font-medium">
+				<span className="text-base font-semibold group-hover:translate-x-1 transition-transform">
 					{t.home}
 				</span>
 			</div>
@@ -424,14 +339,10 @@ const Navbar = () => {
 				<div key={item._id}>
 					{item.children.length === 0 ? (
 						<div
-							onClick={() => {
-								console.log("📱 Clicked mobile menu:", item.title, "slug:", item.slug)
-								handleNavigate(item.slug)
-							}}
-							className="flex items-center space-x-3 py-2.5 px-3 text-white hover:text-yellow-300 hover:bg-blue-700/50 rounded-lg cursor-pointer text-sm transition-all duration-200 group"
+							onClick={() => handleNavigate(item.slug)}
+							className={`py-3 px-4 ${isScrolled ? 'text-white hover:text-yellow-300 hover:bg-blue-700/50' : 'text-gray-800 hover:text-blue-600 hover:bg-gray-100'} rounded-lg cursor-pointer transition-all duration-200 group`}
 						>
-							{item.icon && <span className="text-lg">{item.icon}</span>}
-							<span className="group-hover:translate-x-1 transition-transform font-medium">
+							<span className="text-base font-semibold group-hover:translate-x-1 transition-transform">
 								{item.title}
 							</span>
 						</div>
@@ -439,29 +350,22 @@ const Navbar = () => {
 						<div>
 							<button
 								onClick={() => toggleMenu(`mobile-${item._id}`)}
-								className="flex justify-between items-center w-full py-2.5 px-3 text-white hover:text-yellow-300 hover:bg-blue-700/50 rounded-lg text-sm transition-all duration-200 group"
+								className={`flex justify-between items-center w-full py-3 px-4 ${isScrolled ? 'text-white hover:text-yellow-300 hover:bg-blue-700/50' : 'text-gray-800 hover:text-blue-600 hover:bg-gray-100'} rounded-lg transition-all duration-200 group`}
 							>
-								<div className="flex items-center space-x-3">
-									{item.icon && <span className="text-lg">{item.icon}</span>}
-									<span className="group-hover:translate-x-1 transition-transform font-medium">
-										{item.title}
-									</span>
-								</div>
-								<ChevronDown size={16} className={`transition-transform duration-300 ${openMenu === `mobile-${item._id}` ? "rotate-180 text-yellow-300" : ""}`} />
+								<span className="text-base font-semibold group-hover:translate-x-1 transition-transform">
+									{item.title}
+								</span>
+								<ChevronDown size={16} className={`transition-transform duration-300 ${openMenu === `mobile-${item._id}` ? (isScrolled ? "rotate-180 text-yellow-300" : "rotate-180 text-blue-600") : (isScrolled ? "group-hover:text-yellow-300" : "group-hover:text-blue-600")}`} />
 							</button>
 							{openMenu === `mobile-${item._id}` && (
-								<ul className="pl-9 py-1.5 space-y-0.5 bg-white">
+								<ul className={`pl-8 pr-4 py-2 space-y-1 ${isScrolled ? 'bg-blue-700/50' : 'bg-gray-50'}`}>
 									{item.children.map((child) => (
 										<li
 											key={child._id}
-											onClick={() => {
-												console.log("📱 Clicked mobile child:", child.title, "slug:", child.slug)
-												handleNavigate(child.slug)
-											}}
-											className="flex items-center space-x-3 py-2 text-black hover:text-blue-700 hover:bg-gray-200 cursor-pointer transition-all duration-200 group"
+											onClick={() => handleNavigate(child.slug)}
+											className={`py-2.5 px-3 ${isScrolled ? 'text-white hover:text-yellow-300 hover:bg-blue-700' : 'text-gray-700 hover:text-blue-600 hover:bg-gray-100'} rounded-lg cursor-pointer transition-all duration-200 group`}
 										>
-											{child.icon && <span className="text-base">{child.icon}</span>}
-											<span className="font-medium group-hover:translate-x-1 transition-transform text-sm">
+											<span className="text-sm font-medium group-hover:translate-x-1 transition-transform">
 												{child.title}
 											</span>
 										</li>
@@ -473,133 +377,119 @@ const Navbar = () => {
 				</div>
 			))}
 
-			{/* Bog'lanish - har doim oxirgi */}
+			{/* Bog'lanish */}
 			<div
 				onClick={() => handleNavigate("/contact")}
-				className="flex items-center space-x-3 py-2.5 px-3 text-white hover:text-yellow-300 hover:bg-blue-700/50 rounded-lg cursor-pointer text-sm transition-all duration-200 group"
+				className={`py-3 px-4 ${isScrolled ? 'text-white hover:text-yellow-300 hover:bg-blue-700/50' : 'text-gray-800 hover:text-blue-600 hover:bg-gray-100'} rounded-lg cursor-pointer transition-all duration-200 group`}
 			>
-				<span className="text-lg">📞</span>
-				<span className="group-hover:translate-x-1 transition-transform font-medium">
+				<span className="text-base font-semibold group-hover:translate-x-1 transition-transform">
 					{t.contact}
 				</span>
 			</div>
 		</div>
 	)
 
-	// Background klassini dinamik ravishda o'zgartirish
-	const navBackgroundClass = isScrolled
-		? "bg-gradient-to-r from-blue-900 to-blue-800 shadow-2xl border-b border-blue-600/50"
-		: "bg-transparent"
-
-	const mainNavBackgroundClass = isScrolled
-		? "bg-blue-800/90 backdrop-blur-sm border-t border-blue-600/50"
-		: "bg-transparent"
-
-	const mobileNavBackgroundClass = isScrolled
-		? "bg-blue-900/95 backdrop-blur-sm"
-		: "bg-black/80 backdrop-blur-sm"
+	// Asosiy background - scroll bo'lganda ko'k, bo'lmasa shaffof
+	const mainBackground = isScrolled ? "bg-blue-600 shadow-lg" : "bg-transparent"
 
 	return (
-		<nav className={`fixed top-0 pt-2 left-0 right-0 z-50 w-full transition-all duration-500 ${navBackgroundClass}`}>
-			{/* 🔹 Yuqori qism: Logo va Sarlavha */}
-			<div>
-				<div className="px-4 sm:px-6 lg:px-8 mx-auto">
-					<div className="flex items-center justify-between py-4">
-						{/* 🔹 Logo va Sarlavha */}
-						<div className="flex items-center space-x-3 sm:space-x-4">
-							<div
-								onClick={handleHomeNavigate}
-								className="flex items-center space-x-2 sm:space-x-3 cursor-pointer group"
-							>
-								<img src="/logo.png" alt="Logo" className="h-12 sm:h-14 md:h-16 w-auto transition-transform group-hover:scale-105" />
-							</div>
+		<>
+			{/* Navbar komponenti */}
+			<nav className={`fixed top-0 pt-4 left-0 right-0 z-50 w-full transition-all duration-300 ${mainBackground}`}>
+				{/* Tepa qismi - Logo va funksiyalar */}
+				<div className="px-4 sm:px-6 lg:px-8 xl:px-12 mx-auto">
+					<div className="flex items-center justify-between py-3 lg:py-4">
+						{/* Logo va nom - har doim oq rangda */}
+						<div
+							onClick={handleHomeNavigate}
+							className="flex items-center space-x-3 lg:space-x-4 cursor-pointer flex-shrink-0 group"
+						>
+							<img
+								src="/logo.png"
+								alt="Logo"
+								className="h-10 sm:h-12 lg:h-14 w-auto transition-transform duration-300 group-hover:scale-105"
+							/>
 							<div className="hidden sm:block">
-								<div className={`text-sm md:text-lg lg:text-xl font-bold tracking-tight leading-tight transition-colors duration-500 ${isScrolled ? "text-white" : "text-white"}`}>
+								<div className="text-sm sm:text-base lg:text-lg xl:text-xl font-bold text-white leading-tight">
 									{t.samarkandRegion}
 								</div>
-								<div className={`text-xs md:text-base lg:text-lg font-semibold mt-0.5 md:mt-1 opacity-90 leading-tight transition-colors duration-500 ${isScrolled ? "text-white" : "text-white"}`}>
+								<div className="text-xs sm:text-sm lg:text-base xl:text-lg font-semibold text-white/90 mt-0.5 sm:mt-1 leading-tight max-w-xs sm:max-w-sm lg:max-w-md xl:max-w-lg">
 									{t.zarafshonIrrigation}
 								</div>
 							</div>
 						</div>
 
-						{/* 🔹 O'ng tomonda: Qidirish va Til tanlash */}
-						<div className="flex items-center space-x-4 sm:space-x-6">
-							{/* Maxsus Imkoniyatlar tugmasi */}
+						{/* O'ng tomondagi funksiyalar va ijtimoiy tarmoqlar */}
+						<div className="flex items-center space-x-2 sm:space-x-3 lg:space-x-4">
+							{/* Ijtimoiy tarmoqlar (faqat desktop) */}
+							<div className="hidden lg:flex items-center space-x-2">
+								{renderSocialNetworks()}
+							</div>
+
+							{/* Maxsus Imkoniyatlar tugmasi - har doim oq rangda */}
 							<button
 								onClick={handleAccessibilityClick}
-								className="p-1.5 sm:p-2 text-white hover:text-yellow-300 transition-all duration-300 rounded-lg group"
+								className="p-1.5 sm:p-2 text-white hover:text-yellow-300 hover:bg-blue-700/50 rounded-lg transition-all duration-300 group"
 								title={t.accessibility}
 							>
-								<Eye size={20} className="sm:w-6 sm:h-6 group-hover:scale-110 transition-transform" />
+								<Eye size={18} className="sm:w-5 sm:h-5 lg:w-6 lg:h-6 group-hover:scale-110 transition-transform" />
 							</button>
 
-							{/* Til tanlash */}
+							{/* Til tanlash - har doim oq rangda */}
 							<div className="relative">
 								<select
 									value={language}
 									onChange={(e) => handleLanguageChange(e.target.value)}
-									className={`appearance-none border rounded-lg sm:rounded-xl px-3 sm:px-4 py-1.5 sm:py-2.5 pr-8 sm:pr-10 focus:outline-none focus:ring-2 focus:ring-yellow-300 hover:border-white/50 transition-colors cursor-pointer text-sm sm:text-base font-medium ${isScrolled
-										? "bg-transparent border-white/30 text-white"
-										: "bg-white/10 backdrop-blur-md border-white/20 text-white"
-										}`}
+									className={`appearance-none border rounded-lg px-3 sm:px-4 py-1.5 sm:py-2 pr-8 sm:pr-10 focus:outline-none focus:ring-1 focus:ring-yellow-300 cursor-pointer text-xs sm:text-sm lg:text-base font-medium transition-all duration-300 ${isScrolled ? 'border-white/40 bg-blue-700/50 text-white hover:bg-blue-700' : 'border-white/20 bg-white/20 backdrop-blur-sm text-white hover:bg-white/30'}`}
 								>
-									<option value="uz" className="text-gray-700 bg-white">O'zbekcha</option>
-									<option value="ru" className="text-gray-700 bg-white">Русский</option>
-									<option value="en" className="text-gray-700 bg-white">English</option>
+									<option value="uz" className="text-gray-900 bg-white">O'zbekcha</option>
+									<option value="ru" className="text-gray-900 bg-white">Русский</option>
+									<option value="en" className="text-gray-900 bg-white">English</option>
 								</select>
-								<ChevronDown size={16} className="absolute right-2 sm:right-3 top-1/2 transform -translate-y-1/2 text-white pointer-events-none w-4 h-4 sm:w-4 sm:h-4" />
+								<ChevronDown size={14} className="absolute right-2 sm:right-3 top-1/2 transform -translate-y-1/2 text-white pointer-events-none w-3 h-3 sm:w-4 sm:h-4" />
 							</div>
 
-							{/* 🔹 Kichik ekranlarda menyu tugmasi - o'ng tomonda */}
+							{/* Mobil menyu tugmasi - har doim oq rangda */}
 							<button
-								className="md:hidden p-1.5 sm:p-2 rounded-xl border text-white hover:text-yellow-300 hover:border-yellow-300 transition-all duration-300"
-								style={{
-									borderColor: isScrolled ? 'rgba(255,255,255,0.3)' : 'rgba(255,255,255,0.2)'
-								}}
+								className={`lg:hidden p-1.5 sm:p-2 rounded-lg border transition-all duration-300 ${isScrolled ? 'border-white/40 text-white hover:text-yellow-300 hover:border-yellow-300 hover:bg-blue-700/50' : 'border-white/20 text-white hover:text-yellow-300 hover:border-yellow-300 hover:bg-white/30'}`}
 								onClick={() => setMobileOpen((prev) => !prev)}
 							>
 								{mobileOpen ? (
-									<svg className="w-5 h-5 sm:w-6 sm:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+									<svg className="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
 										<path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
 									</svg>
 								) : (
-									<svg className="w-5 h-5 sm:w-6 sm:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+									<svg className="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
 										<path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
 									</svg>
 								)}
 							</button>
 						</div>
 					</div>
+				</div>
 
-					{/* 🔹 Ijtimoiy tarmoqlar va Lokatsiya - O'NG TOMONDA */}
-					<div className="flex items-center justify-end space-x-4 sm:space-x-6 pb-3 sm:pb-4">
-						{/* Ijtimoiy tarmoqlar */}
-						<div className="flex items-center space-x-3 sm:space-x-4 md:space-x-5">
-							{renderSocialNetworks()}
+				{/* Pastki qismi - Asosiy navigatsiya menyusi */}
+				<div className={`hidden lg:block transition-all duration-300 ${isScrolled ? 'bg-blue-600' : 'bg-transparent'}`}>
+					<div className="px-4 sm:px-6 lg:px-8 xl:px-12 mx-auto">
+						<div className="flex justify-center items-center py-2">
+							{renderDesktopMenu()}
 						</div>
 					</div>
 				</div>
-			</div>
 
-			{/* 🔹 Asosiy navigatsiya menyusi */}
-			<div className={`hidden md:block transition-all duration-500 ${mainNavBackgroundClass}`}>
-				<div className="px-4 sm:px-6 lg:px-8 mx-auto">
-					<div className="flex justify-center items-center">
-						{renderDesktopMenu()}
-					</div>
+				{/* Mobil menyu */}
+				<div
+					className={`lg:hidden transition-all duration-300 overflow-hidden ${mobileOpen ? "max-h-[70vh] opacity-100" : "max-h-0 opacity-0"}`}
+				>
+					{renderMobileMenu()}
 				</div>
-			</div>
+			</nav>
 
-			{/* 🔹 Mobil menyu */}
-			<div
-				className={`md:hidden border-t border-white/20 transition-all duration-500 overflow-hidden ${mobileNavBackgroundClass} ${mobileOpen ? "max-h-[800px] opacity-100" : "max-h-0 opacity-0"}`}
-			>
-				{renderMobileMenu()}
-			</div>
+			{/* Bo'sh joy - Navbar balandligiga teng margin-top */}
+			<div className="h-[120px] lg:h-[140px] w-full" />
 
 			{/* Maxsus Imkoniyatlar Sidebar */}
-			<div className={`fixed top-0 right-0 h-full w-80 sm:w-96 bg-white shadow-2xl z-50 transform transition-transform duration-300 ease-in-out ${showAccessibilityModal ? 'translate-x-0' : 'translate-x-full'}`}>
+			<div className={`fixed top-0 right-0 h-full w-80 sm:w-96 bg-white z-50 transform transition-transform duration-300 ease-in-out ${showAccessibilityModal ? 'translate-x-0' : 'translate-x-full'}`}>
 				{/* Sidebar sarlavhasi */}
 				<div className="bg-blue-600 text-white p-6 flex justify-between items-center">
 					<div>
@@ -608,45 +498,47 @@ const Navbar = () => {
 					</div>
 					<button
 						onClick={handleCloseModal}
-						className="text-white hover:text-yellow-300 transition-colors p-1 rounded-lg"
+						className="text-white hover:text-yellow-300 transition-colors p-1 rounded-lg hover:bg-blue-500/30"
 					>
 						<X size={24} />
 					</button>
 				</div>
 
 				{/* Sidebar kontenti */}
-				<div className="p-6 space-y-6 overflow-y-auto h-[calc(100vh-120px)]">
+				<div className="p-6 space-y-8 overflow-y-auto h-[calc(100vh-120px)]">
 					{/* Mavzu */}
 					<div>
-						<h3 className="text-lg font-semibold text-gray-800 mb-3">{t.theme}</h3>
-						<div className="grid grid-cols-2 gap-3">
+						<h3 className="text-lg font-semibold text-gray-800 mb-4">{t.theme}</h3>
+						<div className="grid grid-cols-2 gap-4">
 							<button
 								onClick={() => handleThemeChange('normal')}
-								className={`py-4 px-4 border rounded-lg transition-colors flex items-center justify-center gap-3 ${accessibilitySettings.theme === 'normal'
+								className={`py-4 px-4 border rounded-lg transition-all duration-300 flex items-center justify-center gap-3 ${accessibilitySettings.theme === 'normal'
 									? 'border-blue-500 bg-blue-50 text-blue-700'
-									: 'border-gray-300 hover:border-blue-500'
+									: 'border-gray-300 hover:border-blue-400'
 									}`}
 							>
-								<Sun size={20} />
+								<Sun size={22} />
+								<span className="text-base font-medium">{t.normalTheme}</span>
 							</button>
 							<button
 								onClick={() => handleThemeChange('grayscale')}
-								className={`py-4 px-4 border rounded-lg transition-colors flex items-center justify-center gap-3 ${accessibilitySettings.theme === 'grayscale'
+								className={`py-4 px-4 border rounded-lg transition-all duration-300 flex items-center justify-center gap-3 ${accessibilitySettings.theme === 'grayscale'
 									? 'border-blue-500 bg-blue-50 text-blue-700'
-									: 'border-gray-300 hover:border-blue-500'
+									: 'border-gray-300 hover:border-blue-400'
 									}`}
 							>
-								<Moon size={20} />
+								<Moon size={22} />
+								<span className="text-base font-medium">{t.grayscaleTheme}</span>
 							</button>
 						</div>
 					</div>
 
 					{/* Shrift o'lchami */}
 					<div>
-						<h3 className="text-lg font-semibold text-gray-800 mb-3">
-							{t.fontSize} - {accessibilitySettings.fontSize}%
+						<h3 className="text-lg font-semibold text-gray-800 mb-4">
+							{t.fontSize} - <span className="text-blue-600">{accessibilitySettings.fontSize}%</span>
 						</h3>
-						<div className="bg-gray-100 rounded-lg p-1">
+						<div className="bg-gray-50 rounded-lg p-5">
 							<div className="relative">
 								<input
 									type="range"
@@ -657,24 +549,11 @@ const Navbar = () => {
 									onChange={(e) => handleFontSizeChange(Number(e.target.value))}
 									className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer slider"
 								/>
-								<div className="flex justify-between text-xs text-gray-500 mt-2">
-									<span>50%</span>
-									<span>75%</span>
-									<span>100%</span>
-									<span>125%</span>
-									<span>150%</span>
-									<span>175%</span>
-									<span>200%</span>
-								</div>
-							</div>
-						</div>
-						<div className="flex justify-center mt-4">
-							<div className="text-center">
-								<div className={`text-${accessibilitySettings.fontSize >= 150 ? 'xl' : accessibilitySettings.fontSize >= 120 ? 'lg' : 'base'} font-bold text-gray-800`}>
-									Namuna matn
-								</div>
-								<div className={`text-${accessibilitySettings.fontSize >= 150 ? 'lg' : accessibilitySettings.fontSize >= 120 ? 'base' : 'sm'} text-gray-600 mt-1`}>
-									Shrift o'lchami: {accessibilitySettings.fontSize}%
+								<div className="flex justify-between text-sm text-gray-600 mt-3">
+									<span className="font-medium">50%</span>
+									<span className="font-medium">100%</span>
+									<span className="font-medium">150%</span>
+									<span className="font-medium">200%</span>
 								</div>
 							</div>
 						</div>
@@ -682,16 +561,16 @@ const Navbar = () => {
 				</div>
 
 				{/* Sidebar pastki qismi */}
-				<div className="absolute bottom-0 left-0 right-0 bg-gray-50 px-6 py-4 border-t border-gray-200 flex justify-between items-center">
+				<div className="absolute bottom-0 left-0 right-0 bg-gray-50 px-6 py-5 border-t border-gray-300 flex justify-between items-center">
 					<button
 						onClick={handleResetAll}
-						className="px-6 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-100 transition-colors"
+						className="px-6 py-2.5 border border-gray-400 text-gray-700 rounded-lg hover:bg-gray-200 transition-all duration-300 font-medium text-sm"
 					>
 						{t.reset}
 					</button>
 					<button
 						onClick={handleCloseModal}
-						className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+						className="px-6 py-2.5 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-all duration-300 font-medium text-sm"
 					>
 						{t.close}
 					</button>
@@ -705,7 +584,7 @@ const Navbar = () => {
 					onClick={handleCloseModal}
 				/>
 			)}
-		</nav>
+		</>
 	)
 }
 

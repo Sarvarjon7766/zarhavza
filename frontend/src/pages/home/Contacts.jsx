@@ -94,12 +94,12 @@ const Contacts = () => {
 
 	// Standart kontakt ma'lumotlari (API ishlamasa foydalanish uchun)
 	const getDefaultContactData = () => ({
-		address_uz: "Samarqand shahar, Gagarin ko'chasi, 70-uy",
-		address_ru: "г. Самарканд, ул. Гагарина, дом 70",
-		address_en: "Samarkand city, Gagarin street, house 70",
-		workin_uz: "Dushanba - Juma: 9:00 - 18:00",
-		workin_ru: "Понедельник - Пятница: 9:00 - 18:00",
-		workin_en: "Monday - Friday: 9:00 - 18:00",
+		address: language === 'uz' ? "Samarqand shahar, Gagarin ko'chasi, 70-uy" :
+			language === 'ru' ? "г. Самарканд, ул. Гагарина, дом 70" :
+				"Samarkand city, Gagarin street, house 70",
+		workin: language === 'uz' ? "Dushanba - Juma: 9:00 - 18:00" :
+			language === 'ru' ? "Понедельник - Пятница: 9:00 - 18:00" :
+				"Monday - Friday: 9:00 - 18:00",
 		phone: "+998 (78) 210-08-93",
 		phone_faks: "+998 (78) 210-08-93",
 		email: "zar.havza@minwater.uz"
@@ -108,33 +108,13 @@ const Contacts = () => {
 	// Tilga mos manzilni olish
 	const getAddressByLanguage = () => {
 		if (!contactData) return ""
-
-		switch (language) {
-			case 'uz':
-				return contactData.address_uz || contactData.address_ru || contactData.address_en || ""
-			case 'ru':
-				return contactData.address_ru || contactData.address_uz || contactData.address_en || ""
-			case 'en':
-				return contactData.address_en || contactData.address_uz || contactData.address_ru || ""
-			default:
-				return contactData.address_uz || ""
-		}
+		return contactData.address || ""
 	}
 
 	// Tilga mos ish vaqtini olish
 	const getWorkinByLanguage = () => {
 		if (!contactData) return ""
-
-		switch (language) {
-			case 'uz':
-				return contactData.workin_uz || contactData.workin_ru || contactData.workin_en || ""
-			case 'ru':
-				return contactData.workin_ru || contactData.workin_uz || contactData.workin_en || ""
-			case 'en':
-				return contactData.workin_en || contactData.workin_uz || contactData.workin_ru || ""
-			default:
-				return contactData.workin_uz || ""
-		}
+		return contactData.workin || ""
 	}
 
 	// Telefon raqamlarini massivga aylantirish

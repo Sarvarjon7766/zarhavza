@@ -40,6 +40,19 @@ class ApplicationService {
 			return { success: false, message: "Server xatosi" }
 		}
 	}
+	async replyMess(id, message) {
+		try {
+			const application = await applicationModel.findByIdAndUpdate(id, { reply_message: message, isStatus: true }, { new: true })
+			if (application) {
+				return { success: true, message: "javobingiz yuborildi" }
+			} else {
+				return { success: false, message: "Javob berishda xatolik" }
+			}
+		} catch (error) {
+			console.log(error)
+			return { success: false, message: "Server error" }
+		}
+	}
 }
 
 module.exports = new ApplicationService()
